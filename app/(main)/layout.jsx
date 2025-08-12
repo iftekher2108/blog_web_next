@@ -1,5 +1,6 @@
 // import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "@fortawesome/fontawesome-free/css/all.min.css"
 import Header from "@/component/header";
 import Footer from "@/component/footer";
 
@@ -25,7 +26,7 @@ export default function RootLayout({ children }) {
       // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Header />
-          {children}
+        {children}
         <Footer />
       </body>
     </html>
