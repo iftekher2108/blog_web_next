@@ -3,16 +3,14 @@
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 
-export default function LoginComponent() {
+export default function RegisterComponent() {
 
     const router = useRouter()
-
     const [passShow, setPassShow] = useState(false)
 
     const formRef = useRef(null)
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
-
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -21,7 +19,7 @@ export default function LoginComponent() {
         try {
             const formData = new FormData(e.currentTarget)
 
-            const res = await fetch('/api/login', {
+            const res = await fetch('/api/register', {
                 method: 'post',
                 body: formData,
             })
@@ -43,10 +41,10 @@ export default function LoginComponent() {
                 }
                 return;
             }
-            console.log("Login success:", data);
-             if(typeof window !== 'undefined') {
+            console.log("Register success:", data);
+            if (typeof window !== 'undefined') {
                 document.cookie = `token=${data.token}`;
-                localStorage.setItem('user',JSON.stringify(data.user))
+                localStorage.setItem('user', JSON.stringify(data.user))
             }
             router.push('/admin')
         }
@@ -60,9 +58,9 @@ export default function LoginComponent() {
 
     }
 
+
     return (
         <>
-
             {errors.length > 0 && (
                 <div className="mb-4 text-red-500">
                     {errors.map((err, idx) => (
@@ -72,9 +70,16 @@ export default function LoginComponent() {
             )}
 
 
-            <div className="card-title p-4 bg-primary rounded text-white mb-5">Login</div>
+            <div className="card-title p-4 bg-primary rounded text-white mb-5">Register</div>
             <div className="">
                 <form ref={formRef} onSubmit={handleSubmit}>
+                    <div className="form-control mb-5">
+                        <label htmlFor="" className="floating-label">
+                            <span>Name</span>
+                            <input type="text" className="input input-primary w-full focus:outline-0" name="name" placeholder="Name" />
+                        </label>
+                        {errors.name && <p className="text-red-500">{errors.name}</p>}
+                    </div>
                     <div className="form-control mb-5">
                         <label htmlFor="" className="floating-label">
                             <span>Email</span>
@@ -95,7 +100,7 @@ export default function LoginComponent() {
 
                     </div>
 
-                    <button className="btn w-full btn-primary">{loading ? <span className="loading loading-spinner loading-md"></span> : 'Login'}</button>
+                    <button className="btn w-full btn-primary">{loading ? <span className="loading loading-spinner loading-md"></span> : 'Register'}</button>
 
                 </form>
 
