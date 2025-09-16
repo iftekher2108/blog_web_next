@@ -1,5 +1,5 @@
 import Connection from "@/lib/Database";
-import User from "@/model/User";
+import User from "@/model/user";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -14,7 +14,7 @@ export async function POST(request) {
     try {
         await Connection();
         const formData = await request.formData();
-        const { name, email, mobile, password } = await Object.fromEntries(formData) ;
+        const { name, email, mobile, password } = Object.fromEntries(formData) ;
         //  const { name, email, mobile, password } = Object.fromEntries(formData);
         const user = await User.create({
             name,

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { loginSchema } from "./loginSchema";
-import User from "@/model/User";
+import User from "@/model/user";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken'
 import { z } from "zod";

@@ -1,6 +1,7 @@
 'use client'
 import { useRouter } from "next/navigation"
 import { useUser } from "./userContext";
+import Link from "next/link";
 export default function Header() {
     const router = useRouter();
     function handleLogout() {
@@ -12,9 +13,9 @@ export default function Header() {
     }
     const { user } = useUser();
     return (
-        <div className="navbar bg-base-100 shadow-sm px-4">
+        <div className="navbar bg-base-100 sticky top-0 z-10 shadow-sm px-4">
             <div className="flex-1">
-                <a className="btn btn-ghost text-xl">daisyUI</a>
+                <Link href={'/admin'} className="btn btn-ghost text-xl">daisyUI</Link>
             </div>
             <div className="flex gap-2">
                 <div className="dropdown dropdown-end">
@@ -30,10 +31,10 @@ export default function Header() {
                         tabIndex={0}
                         className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
                         <li>
-                            <a className="justify-between">
+                            <Link href={'/admin/profile'} className="justify-between">
                                 Profile
                                 <span className="badge">New</span>
-                            </a>
+                            </Link>
                         </li>
                         <li><a>Setting </a></li>
                         <li><button onClick={handleLogout} >Logout</button></li>

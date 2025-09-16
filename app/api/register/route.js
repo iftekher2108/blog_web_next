@@ -1,7 +1,9 @@
 import z from "zod";
 import { registerSchema } from "./registerSchema";
+import { NextResponse } from "next/server";
+import bcrypt from 'bcryptjs';
 import Connection from "@/lib/Database";
-import User from "@/model/User";
+import User from "@/model/user";
 import jwt from 'jsonwebtoken'
 
 

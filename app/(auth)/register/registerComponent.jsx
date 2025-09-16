@@ -50,6 +50,7 @@ export default function RegisterComponent() {
         }
         catch (err) {
             setErrors([{ message: "Something went wrong" }]);
+            console.log(err)
 
         } finally {
             setLoading(false)

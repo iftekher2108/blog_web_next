@@ -1,10 +1,8 @@
 
 export default function Page() {
-    return(
+    return (
         <>
-      
-        dashboard
-
+            dashboard
         </>
-    ) 
+    )
 }
