@@ -3,7 +3,7 @@ import { registerSchema } from "./registerSchema";
 import { NextResponse } from "next/server";
 import bcrypt from 'bcryptjs';
 import Connection from "@/lib/Database";
-import User from "@/model/user";
+import User from "@/model/user.model";
 import jwt from 'jsonwebtoken'
 
 

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { Eye, EyeClosed } from "lucide-react"
 
 export default function LoginComponent() {
 
@@ -11,13 +12,13 @@ export default function LoginComponent() {
 
     const formRef = useRef(null)
     const [loading, setLoading] = useState(false)
-    const [errors, setErrors] = useState({})
+    const [error, setError] = useState({})
 
 
     async function handleSubmit(e) {
         e.preventDefault();
         setLoading(true)
-        setErrors([])
+        setError([])
         try {
             const formData = new FormData(e.currentTarget)
 
@@ -37,9 +38,9 @@ export default function LoginComponent() {
                         const field = err.path[0]; // 'email' or 'password'
                         formattedErrors[field] = err.message;
                     });
-                    setErrors(formattedErrors); // Zod returns an array of issues
+                    setError(formattedErrors); // Zod returns an array of issues
                 } else if (data.error) {
-                    setErrors([{ message: data.error }]); // single error case
+                    setError([{ message: data.error }]); // single error case
                 }
                 return;
             }
@@ -51,7 +52,7 @@ export default function LoginComponent() {
             router.push('/admin')
         }
         catch (err) {
-            setErrors([{ message: "Something went wrong" }]);
+            setError([{ message: "Something went wrong" }]);
 
         } finally {
             setLoading(false)
@@ -63,9 +64,9 @@ export default function LoginComponent() {
     return (
         <>
 
-            {errors.length > 0 && (
+            {error.length > 0 && (
                 <div className="mb-4 text-red-500">
-                    {errors.map((err, idx) => (
+                    {error.map((err, idx) => (
                         <p key={idx}>{err.message}</p>
                     ))}
                 </div>
@@ -80,7 +81,7 @@ export default function LoginComponent() {
                             <span>Email</span>
                             <input type="email" className="input input-primary w-full focus:outline-0" name="email" placeholder="Email" />
                         </label>
-                        {errors.email && <p className="text-red-500">{errors.email}</p>}
+                        {error.email && <p className="text-red-500">{error.email}</p>}
                     </div>
 
                     <div className="form-control mb-5">
@@ -88,10 +89,12 @@ export default function LoginComponent() {
                             <span>Password</span>
                             <div className="relative">
                                 <input type={passShow ? "text" : "password"} className="input input-primary w-full focus:outline-0" name="password" placeholder="Password" />
-                                <i onClick={() => setPassShow(!passShow)} className={`fa-solid absolute top-[50%] right-2 z-[5] -translate-y-[50%] ${passShow ? 'fa-eye' : 'fa-eye-low-vision'} `}></i>
+                                { passShow ?
+                                 <Eye size={20} onClick={() => setPassShow(!passShow)}  className="absolute top-[50%] right-2 z-5 -translate-y-[50%]" /> : <EyeClosed onClick={() => setPassShow(!passShow)} className="absolute top-[50%] right-2 z-5 -translate-y-[50%]" size={20} /> } 
+                                 {/* <i onClick={() => setPassShow(!passShow)} className={`fa-solid absolute top-[50%] right-2 z-[5] -translate-y-[50%] ${passShow ? 'fa-eye' : 'fa-eye-low-vision'} `}></i> */}
                             </div>
                         </label>
-                        {errors.password && <p className="text-red-500">{errors.password}</p>}
+                        {error.password && <p className="text-red-500">{error.password}</p>}
 
                     </div>
 

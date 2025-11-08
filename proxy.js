@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
-export default function Middleware(request) {
-    const token = request.cookies.get("token")?.value; // Get cookie from request
+export default async function proxy(request) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value; // Get cookie from request
 
     if (request.nextUrl.pathname.startsWith('/admin') && !token) {
         const response = NextResponse.redirect(new URL("/login", request.url));
         response.cookies.set("error", "You are not allowed to access login first", {
             path: "/",       // available on all pages
-            maxAge: 3,       // expires in 5 seconds
+            maxAge: 2,       // expires in 2 seconds
             httpOnly: false, // allow frontend JS to read it
         });
         return response;
@@ -18,7 +20,7 @@ export default function Middleware(request) {
         const response = NextResponse.redirect(new URL("/admin", request.url));
         response.cookies.set("error", "Logout First", {
             path: "/",       // available on all pages
-            maxAge: 3,       // expires in 5 seconds
+            maxAge: 2,       // expires in 2 seconds
             httpOnly: false, // allow frontend JS to read it
         });
         return response;
@@ -29,5 +31,5 @@ export default function Middleware(request) {
 }
 
 export const config = {
-    matcher: ['/admin/:path*', '/api/admin/:path*','/login','/register'],
+    matcher: ['/admin/:path*', '/api/admin/:path*', '/login', '/register'],
 }

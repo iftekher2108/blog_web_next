@@ -7,8 +7,8 @@ import Header from "./header";
 
 export default async function AdminLayout({ children }) {
 
-    const cookieStore = cookies();
-    const error = await cookieStore.get("error")?.value;
+    const cookieStore = await cookies();
+    const error = cookieStore.get("error")?.value;
     return (
         <html lang="en">
             <body>

@@ -21,8 +21,8 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const cookieStore = cookies();
-  const error = await cookieStore.get("error")?.value;
+  const cookieStore = await cookies();
+  const error = cookieStore.get("error")?.value;
 
   return (
     <html lang="en">

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { loginSchema } from "./loginSchema";
-import User from "@/model/user";
+import User from "@/model/user.model";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken'
 import { z } from "zod";
@@ -36,7 +36,7 @@ export async function POST(req) {
     
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ errors: error.issues }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     console.error("Login error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
