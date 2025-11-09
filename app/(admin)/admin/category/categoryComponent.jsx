@@ -6,7 +6,12 @@ import { useState, useCallback, useEffect, useRef } from "react";
 export default function CategoryComponent({ token }) {
     // const cookieStore = await cookies()
     const [categories, setCategories] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [errors, setErrors] = useState([])
+    const [status, setStatus] = useState(null)
+    const [file, setFile] = useState(null)
     const formRef = useRef(null)
+
     const [formdata, setFormData] = useState({
         id: null,
         name: '',
@@ -17,22 +22,11 @@ export default function CategoryComponent({ token }) {
         status: '',
     })
 
-    const getCategories = useCallback(async () => {
-        const token = document.cookie
-    })
+    // const getCategories = useCallback(async () => {
 
-    // 3. Single handler function for all *top-level* fields
-    const handleChange = (e) => {
-        const { name, value } = e.target;
+    // })
+    // useEffect()
 
-        console.log(`${name} = `, value)
-        // Use the spread operator (...) to keep all existing fields
-        // and only update the field matching the input's 'name'
-        setFormData(prevData => ({
-            ...prevData,
-            [name]: value, // This updates the specific top-level field (e.g., 'name', 'code')
-        }));
-    };
 
     const modelOpen = async (id = null) => {
         if (id == null) {
@@ -54,14 +48,52 @@ export default function CategoryComponent({ token }) {
     }
 
 
-    const handleSubmit = () => {
+    const handleSubmit = async(e) => {
+        e.preventDefault();
+        setLoading(true)
+        setErrors([])
+        try {
+            const formData = new FormData(e.currentTarget)
+            formData.append('picture',file)
+            const res = await fetch('/api/login', {
+                method: 'post',
+                body: formData,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
 
+            const data = await res.json();
+            console.log(data)
+            if (!res.ok) {
+                // Zod error from backend
+                if (data.errors) {
+                    setErrors(data.errors); // Zod returns an array of issues
+                } else if (data.message) {
+                    setErrors({ message: data.message }); // single error case
+                }
+                return;
+            }
+            console.log("Create success:", data);
+        }
+        catch (err) {
+            setErrors({ message: "Something went wrong" });
+
+        } finally {
+            setLoading(false)
+            formRef.current.reset()
+        }
     }
 
 
 
     return (
         <>
+            {
+                status && <div role="alert" className={`alert ${ status == 201 ? 'alert-success' : status== 400 ? 'alert-error' : '' } alert-soft`}>
+                    <span>{status}</span>
+                </div>
+            }
             <div className="flex justify-between">
                 <h3 className="text-primary text-xl font-bold">Category List</h3>
                 <button onClick={() => modelOpen()} className="btn btn-primary"><Plus size={20} /> Add Category</button>
@@ -72,8 +104,8 @@ export default function CategoryComponent({ token }) {
 
                         <h3 className="font-bold text-lg">Hello!</h3>
                         <div className="my-3">
-                            <form ref={formRef} onSubmit={handleSubmit} >
-                                
+                            <form ref={formRef} onSubmit={handleSubmit} encType="multipart/form-data" >
+
                                 <div className="form-control mb-3">
                                     <label className="floating-label">
                                         <input type="text" placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
@@ -89,7 +121,7 @@ export default function CategoryComponent({ token }) {
                                 </div>
 
                                 <div className="flex justify-end">
-                                        <button type="submit" className="btn btn-primary">Submit</button>
+                                    <button type="submit" className="btn btn-primary">Submit</button>
                                 </div>
                             </form>
                         </div>
