@@ -1,22 +1,23 @@
 "use client"
 import { Plus } from "lucide-react"
-import { useState, useCallback, useEffect} from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 // import { cookies } from "next/headers";
 
-export default function CategoryComponent({token}) {
+export default function CategoryComponent({ token }) {
     // const cookieStore = await cookies()
     const [categories, setCategories] = useState([])
+    const formRef = useRef(null)
     const [formdata, setFormData] = useState({
         id: null,
         name: '',
         banner: null,
         picture: null,
         description: '',
-        content:'',
+        content: '',
         status: '',
     })
 
-    const getCategories = useCallback(async()=>{
+    const getCategories = useCallback(async () => {
         const token = document.cookie
     })
 
@@ -52,6 +53,13 @@ export default function CategoryComponent({token}) {
         }
     }
 
+
+    const handleSubmit = () => {
+
+    }
+
+
+
     return (
         <>
             <div className="flex justify-between">
@@ -63,26 +71,47 @@ export default function CategoryComponent({token}) {
                         <button onClick={() => document.getElementById('categoryModel').removeAttribute('open')} className="btn btn-circle btn-ghost absolute right-2 top-2">✕</button>
 
                         <h3 className="font-bold text-lg">Hello!</h3>
-                        <p className="py-4">Press ESC key or click on ✕ button to close</p>
+                        <div className="my-3">
+                            <form ref={formRef} onSubmit={handleSubmit} >
+                                
+                                <div className="form-control mb-3">
+                                    <label className="floating-label">
+                                        <input type="text" placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
+                                        <span>Name</span>
+                                    </label>
+                                </div>
+
+                                <div className="form-control mb-3">
+                                    <label className="floating-label">
+                                        <input type="text" placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
+                                        <span>Name</span>
+                                    </label>
+                                </div>
+
+                                <div className="flex justify-end">
+                                        <button type="submit" className="btn btn-primary">Submit</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </dialog>
             </div>
             <div className="mt-5">
-               <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-                <table className="table">
-                    {/* head */}
-                    <thead>
-                        <tr className="bg-primary">
-                            <th>Sl</th>
-                            <th>Banner</th>
-                            <th>Picture</th>
-                            <th>Name</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {/* {departments.map((department, i) => (
+                <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+                    <table className="table">
+                        {/* head */}
+                        <thead>
+                            <tr className="bg-primary">
+                                <th>Sl</th>
+                                <th>Banner</th>
+                                <th>Picture</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {/* {departments.map((department, i) => (
                             <tr key={department.id}>
                                 <td>{i + 1}</td>
                                 <td>{department.name}</td>
@@ -98,9 +127,9 @@ export default function CategoryComponent({token}) {
                         ))} */}
 
 
-                    </tbody>
-                </table>
-            </div>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </>
     )

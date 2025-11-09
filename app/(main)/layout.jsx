@@ -4,6 +4,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css"
 import Header from "@/component/header";
 import Footer from "@/component/footer";
 import { cookies } from "next/headers";
+import { X } from "lucide-react";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -31,8 +32,9 @@ export default async function RootLayout({ children }) {
       >
         <Header />
         {error && (
-          <p className="p-2 bg-error rounded text-white">{error}</p>
-        )}
+          <div className="alert alert-error bg-error rounded text-white">
+            {error}
+             </div>)}
         {children}
         <Footer />
       </body>

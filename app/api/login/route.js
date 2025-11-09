@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken'
 import { z } from "zod";
 import Connection from "@/lib/Database";
+import errorOrganize from "@/helper/zError";
 
 export async function POST(req) {
   // const password = "parvezkhan123456"
@@ -21,13 +22,13 @@ export async function POST(req) {
     // Find user by email (await needed!)
     const user = await User.findOne({ email: data.email }).exec();
     if (!user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
     }
 
     // Compare hashed passwords
     const passwordMatch = await bcrypt.compare(data.password, user.password);
     if (!passwordMatch) {
-      return NextResponse.json({ error: "Invalid email & passwords" }, { status: 401 });
+      return NextResponse.json({ message: "Invalid email & passwords" }, { status: 401 });
     }
 
     // TODO: Generate JWT or session cookie here
@@ -36,9 +37,10 @@ export async function POST(req) {
     
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
+      const errors = errorOrganize(error.issues)
+      return NextResponse.json({ errors }, { status: 400 });
     }
     console.error("Login error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

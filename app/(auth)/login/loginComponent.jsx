@@ -12,13 +12,13 @@ export default function LoginComponent() {
 
     const formRef = useRef(null)
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState({})
+    const [errors, setErrors] = useState({})
 
 
     async function handleSubmit(e) {
         e.preventDefault();
         setLoading(true)
-        setError([])
+        setErrors([])
         try {
             const formData = new FormData(e.currentTarget)
 
@@ -33,14 +33,9 @@ export default function LoginComponent() {
             if (!res.ok) {
                 // Zod error from backend
                 if (data.errors) {
-                    const formattedErrors = {};
-                    data.errors.forEach(err => {
-                        const field = err.path[0]; // 'email' or 'password'
-                        formattedErrors[field] = err.message;
-                    });
-                    setError(formattedErrors); // Zod returns an array of issues
-                } else if (data.error) {
-                    setError([{ message: data.error }]); // single error case
+                    setErrors(data.errors); // Zod returns an array of issues
+                } else if (data.message) {
+                    setErrors({ message: data.message }); // single error case
                 }
                 return;
             }
@@ -52,7 +47,7 @@ export default function LoginComponent() {
             router.push('/admin')
         }
         catch (err) {
-            setError([{ message: "Something went wrong" }]);
+            setErrors({ message: "Something went wrong" });
 
         } finally {
             setLoading(false)
@@ -64,11 +59,9 @@ export default function LoginComponent() {
     return (
         <>
 
-            {error.length > 0 && (
+            {errors.message && (
                 <div className="mb-4 text-red-500">
-                    {error.map((err, idx) => (
-                        <p key={idx}>{err.message}</p>
-                    ))}
+                        <p>{errors.message}</p>
                 </div>
             )}
 
@@ -81,7 +74,7 @@ export default function LoginComponent() {
                             <span>Email</span>
                             <input type="email" className="input input-primary w-full focus:outline-0" name="email" placeholder="Email" />
                         </label>
-                        {error.email && <p className="text-red-500">{error.email}</p>}
+                        {errors.email && <p className="text-red-500">{errors.email}</p>}
                     </div>
 
                     <div className="form-control mb-5">
@@ -94,7 +87,7 @@ export default function LoginComponent() {
                                  {/* <i onClick={() => setPassShow(!passShow)} className={`fa-solid absolute top-[50%] right-2 z-[5] -translate-y-[50%] ${passShow ? 'fa-eye' : 'fa-eye-low-vision'} `}></i> */}
                             </div>
                         </label>
-                        {error.password && <p className="text-red-500">{error.password}</p>}
+                        {errors.password && <p className="text-red-500">{errors.password}</p>}
 
                     </div>
 

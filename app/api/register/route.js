@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import Connection from "@/lib/Database";
 import User from "@/model/user.model";
 import jwt from 'jsonwebtoken'
+import errorOrganize from "@/helper/zError";
 
 
 export async function POST(req) {
@@ -18,7 +19,7 @@ export async function POST(req) {
     // Check if user exists
     const exists = await User.findOne({ email: data.email }).exec();
     if (exists) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 400 });
+      return NextResponse.json({ message: "Email already registered" }, { status: 400 });
     }
 
     // Hash password before saving
@@ -36,9 +37,10 @@ export async function POST(req) {
     return NextResponse.json({ message: "User registered", token,  user }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ errors: error.issues }, { status: 400 });
+      const errors = errorOrganize(error.issues)
+      return NextResponse.json({ errors }, { status: 400 });
     }
     console.error("Register error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

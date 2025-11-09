@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { EyeClosed, Eye } from "lucide-react"
 
 export default function RegisterComponent() {
 
@@ -30,14 +31,9 @@ export default function RegisterComponent() {
             if (!res.ok) {
                 // Zod error from backend
                 if (data.errors) {
-                    const formattedErrors = {};
-                    data.errors.forEach(err => {
-                        const field = err.path[0]; // 'email' or 'password'
-                        formattedErrors[field] = err.message;
-                    });
-                    setErrors(formattedErrors); // Zod returns an array of issues
-                } else if (data.error) {
-                    setErrors([{ message: data.error }]); // single error case
+                    setErrors(data.errors); // Zod returns an array of issues
+                } else if (data.message) {
+                    setErrors({ message: data.message }); // single error case
                 }
                 return;
             }
@@ -49,7 +45,7 @@ export default function RegisterComponent() {
             router.push('/admin')
         }
         catch (err) {
-            setErrors([{ message: "Something went wrong" }]);
+            setErrors({ message: "Something went wrong" });
             console.log(err)
 
         } finally {
@@ -62,11 +58,9 @@ export default function RegisterComponent() {
 
     return (
         <>
-            {errors.length > 0 && (
+            {errors.message && (
                 <div className="mb-4 text-red-500">
-                    {errors.map((err, idx) => (
-                        <p key={idx}>{err.message}</p>
-                    ))}
+                        <p>{errors.message}</p>
                 </div>
             )}
 
@@ -94,7 +88,9 @@ export default function RegisterComponent() {
                             <span>Password</span>
                             <div className="relative">
                                 <input type={passShow ? "text" : "password"} className="input input-primary w-full focus:outline-0" name="password" placeholder="Password" />
-                                <i onClick={() => setPassShow(!passShow)} className={`fa-solid absolute top-[50%] right-2 z-[5] -translate-y-[50%] ${passShow ? 'fa-eye' : 'fa-eye-low-vision'} `}></i>
+                                { passShow ?
+                                 <Eye size={20} onClick={() => setPassShow(!passShow)}  className="absolute top-[50%] right-2 z-5 -translate-y-[50%]" /> : <EyeClosed onClick={() => setPassShow(!passShow)} className="absolute top-[50%] right-2 z-5 -translate-y-[50%]" size={20} /> } 
+                                {/* <i onClick={() => setPassShow(!passShow)} className={`fa-solid absolute top-[50%] right-2 z-[5] -translate-y-[50%] ${passShow ? 'fa-eye' : 'fa-eye-low-vision'} `}></i> */}
                             </div>
                         </label>
                         {errors.password && <p className="text-red-500">{errors.password}</p>}
