@@ -13,7 +13,6 @@ var categorySchema = new mongoose.Schema({
     },
     picture:{
         type:String,
-        required:false,
     },
     slug:{
         type:String,

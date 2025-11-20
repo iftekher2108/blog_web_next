@@ -143,15 +143,15 @@ export default function CategoryComponent({ token }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {/* {departments.map((department, i) => (
-                            <tr key={department.id}>
+                            {/* {categories.map((category, i) => (
+                            <tr key={category.id}>
                                 <td>{i + 1}</td>
-                                <td>{department.name}</td>
-                                <td>{department?.headDoctor?.name}</td>
-                                <td>{department.email}</td>
-                                <td>{department.phone}</td>
+                                <td>{category.name}</td>
+                                <td>{category?.headDoctor?.name}</td>
+                                <td>{category.email}</td>
+                                <td>{category.phone}</td>
                                 <td>
-                                    <button onClick={() => modelOpen(department.id)} className="btn btn-sm btn-info me-1"><i className="fa-solid fa-pen-to-square"></i></button>
+                                    <button onClick={() => modelOpen(category.id)} className="btn btn-sm btn-info me-1"><i className="fa-solid fa-pen-to-square"></i></button>
                                     <button className="btn btn-sm btn-error me-1"><i className="fa-solid fa-trash"></i></button>
 
                                 </td>
