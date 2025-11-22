@@ -1,62 +1,100 @@
 "use client"
 import { Plus } from "lucide-react"
-import { useState, useCallback, useEffect, useRef } from "react";
-// import { cookies } from "next/headers";
+import { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
 
 export default function CategoryComponent({ token }) {
-    // const cookieStore = await cookies()
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
-    const [errors, setErrors] = useState([])
-    const [status, setStatus] = useState(null)
-    const [file, setFile] = useState(null)
-    const formRef = useRef(null)
+    const [errors, setErrors] = useState({})
 
-    const [formdata, setFormData] = useState({
-        id: null,
-        name: '',
-        banner: null,
-        picture: null,
-        description: '',
-        content: '',
-        status: '',
+    const [id, setId] = useState(null)
+    const [name, setName] = useState('')
+    const [status, setStatus] = useState('active')
+
+    const [banner, setBanner] = useState(null)
+    const [bannerUrl, setBannerUrl] = useState(null)
+
+    const [picture, setPicture] = useState(null)
+    const [pictureUrl, setPictureUrl] = useState(null)
+    
+
+    const getCategories = useCallback(async () => {
+        try {
+            const res = await fetch('/api/admin/category', {
+                method: "GET",
+                headers: {
+                    "content-type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            const data = await res.json();
+            setCategories(data.categories || []);
+            console.log(categories);
+
+        } catch (error) {
+            console.error("Failed to fetch categories:", error);
+        }
     })
 
-    // const getCategories = useCallback(async () => {
-
-    // })
-    // useEffect()
+    useEffect(() => {
+        getCategories();
+    }, [])
 
 
     const modelOpen = async (id = null) => {
         if (id == null) {
+            reset()
             document.getElementById('categoryModel').setAttribute('open', true)
         } else {
+            reset()
+            setId(id)
             document.getElementById('categoryModel').setAttribute('open', true)
-            // const token = await getToken();
-            // const res = await Fetch(`/api/departments/${id}`, {
-            //     method: "GET",
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //         "Authorization": "Bearer " + token
-            //     }
-            // })
-            // const data = await res.json()
-            // console.log(data)
-
+            const res = await fetch(`/api/admin/category?id=${id}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            const data = await res.json()
+            console.log(data)
+            setId(data.category._id)
+            setName(data.category.name)
+            setPictureUrl(data.category.picture)
+            setBannerUrl(data.category.banner)
         }
     }
 
+    const reset = () => {
+        setId(null)
+        setName('');
+        setPicture(null);
+        setBanner(null);
+        setStatus('active');
+        setPictureUrl(null)
+        setBannerUrl(null)
+    }
 
-    const handleSubmit = async(e) => {
-        e.preventDefault();
+    const modelClose = () => {
+        document.getElementById('categoryModel').removeAttribute('open');
+        reset();
+    }
+
+
+    const handleSubmit = async () => {
         setLoading(true)
-        setErrors([])
+        setErrors({})
         try {
-            const formData = new FormData(e.currentTarget)
-            formData.append('picture',file)
-            const res = await fetch('/api/login', {
-                method: 'post',
+            const formData = new FormData()
+
+            formData.append("name", name);
+            formData.append('status', status)
+            if (picture) formData.append("picture", picture);
+            if (banner) formData.append("banner", banner);
+            if (id) formData.append('id', id)
+            const res = await fetch('/api/admin/category', {
+                method: 'POST',
                 body: formData,
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -75,23 +113,22 @@ export default function CategoryComponent({ token }) {
                 return;
             }
             console.log("Create success:", data);
+            modelClose()
         }
         catch (err) {
             setErrors({ message: "Something went wrong" });
-
         } finally {
             setLoading(false)
-            formRef.current.reset()
+            getCategories()
         }
     }
-
 
 
     return (
         <>
             {
-                status && <div role="alert" className={`alert ${ status == 201 ? 'alert-success' : status== 400 ? 'alert-error' : '' } alert-soft`}>
-                    <span>{status}</span>
+                errors.message && <div role="alert" className={`alert alert-error alert-soft mb-3`}>
+                    <span>{errors.message}</span>
                 </div>
             }
             <div className="flex justify-between">
@@ -100,30 +137,78 @@ export default function CategoryComponent({ token }) {
 
                 <dialog id="categoryModel" className="modal">
                     <div className="modal-box">
-                        <button onClick={() => document.getElementById('categoryModel').removeAttribute('open')} className="btn btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                        <button onClick={() => modelClose()} className="btn btn-circle btn-ghost absolute right-2 top-2">✕</button>
 
-                        <h3 className="font-bold text-lg">Hello!</h3>
+                        <h3 className="font-bold text-lg">Category</h3>
                         <div className="my-3">
-                            <form ref={formRef} onSubmit={handleSubmit} encType="multipart/form-data" >
+                            <div className="form-control mb-3">
+                                <label className="floating-label">
+                                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
+                                </label>
+                                {errors.name && <span className="text-error">{errors.name}</span>}
+                            </div>
 
-                                <div className="form-control mb-3">
-                                    <label className="floating-label">
-                                        <input type="text" placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
-                                        <span>Name</span>
-                                    </label>
+                            {
+                                id && <input type="hidden" value={id} name="id" />
+                            }
+
+                            <div className="grid gap-2 md:grid-cols-2">
+                                <div className="col-span-1">
+                                    <div className="form-control mb-3">
+                                        <label className="label">Picture (400x500 px)</label>
+                                        {picture &&
+                                            <img src={`${URL.createObjectURL(picture)}`} className="rounded mb-3" height={80} alt="picture" />
+                                        }
+                                        {/* Else If editing and existing URL exists → preview old image */}
+                                        {!picture && pictureUrl && (
+                                            <img
+                                                src={`/${pictureUrl}`}
+                                                className="rounded mb-3"
+                                                height={80}
+                                                alt="picture"
+                                            />
+                                        )}
+                                        <input type="file" onChange={(e) => setPicture(e.target.files[0])} name="picture" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
+                                    </div>
+                                    {errors.picture && <span className="text-error">{errors.picture}</span>}
                                 </div>
 
-                                <div className="form-control mb-3">
-                                    <label className="floating-label">
-                                        <input type="text" placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
-                                        <span>Name</span>
-                                    </label>
-                                </div>
+                                <div className="col-span-1">
+                                    <div className="form-control mb-3">
+                                        <label className="label">Banner (1920x1080 px)</label>
+                                        {banner &&
+                                            <img src={`${URL.createObjectURL(banner)}`} className="rounded mb-3" height={80} alt="banner" />
+                                        }
+                                        {/* Else If editing and existing URL exists → preview old image */}
+                                        {!banner && bannerUrl && (
+                                            <img
+                                                src={`/${bannerUrl}`}
+                                                className="rounded mb-3"
+                                                height={80}
+                                                alt="banner"
+                                            />
+                                        )}
+                                        <input type="file" onChange={(e) => setBanner(e.target.files[0])} name="banner" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
+                                    </div>
+                                    {errors.banner && <span className="text-error">{errors.banner}</span>}
 
-                                <div className="flex justify-end">
-                                    <button type="submit" className="btn btn-primary">Submit</button>
                                 </div>
-                            </form>
+                            </div>
+
+                            <div className="form-control mb-3">
+                                <label className="floating-label">
+                                    <select name="status" onChange={(e) => setStatus(e.target.value)} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </label>
+                                {errors.status && <span className="text-error">{errors.status}</span>}
+                            </div>
+
+
+                            <div className="flex justify-end">
+                                <button onClick={handleSubmit} className="btn btn-primary">{loading ? <span className="loading loading-spinner loading-md"></span> : "Submit"}</button>
+                            </div>
                         </div>
                     </div>
                 </dialog>
@@ -135,29 +220,28 @@ export default function CategoryComponent({ token }) {
                         <thead>
                             <tr className="bg-primary">
                                 <th>Sl</th>
-                                <th>Banner</th>
                                 <th>Picture</th>
+                                <th>Banner</th>
                                 <th>Name</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {/* {categories.map((category, i) => (
-                            <tr key={category.id}>
-                                <td>{i + 1}</td>
-                                <td>{category.name}</td>
-                                <td>{category?.headDoctor?.name}</td>
-                                <td>{category.email}</td>
-                                <td>{category.phone}</td>
-                                <td>
-                                    <button onClick={() => modelOpen(category.id)} className="btn btn-sm btn-info me-1"><i className="fa-solid fa-pen-to-square"></i></button>
-                                    <button className="btn btn-sm btn-error me-1"><i className="fa-solid fa-trash"></i></button>
+                            {categories.map((category, i) => (
+                                <tr key={category._id}>
+                                    <td>{i + 1}</td>
+                                    <td>{category.picture && <Image src={`/${category.picture}`} className="rounded" width={80} height={80} alt={`${category.name}`} /> }</td>
+                                    <td>{category.banner && <Image src={`/${category.banner}`} className="rounded" width={80} height={80} alt={`${category.name}`} /> }</td>
+                                    <td>{category.name}</td>
+                                    <td><span className={`badge ${category.status == 'active' ? 'badge-success' : 'badge-error'}`}>{category.status} </span></td>
+                                    <td>
+                                        <button onClick={() => modelOpen(category._id)} className="btn btn-sm btn-info me-1"><i className="fa-solid fa-pen-to-square"></i></button>
+                                        <button className="btn btn-sm btn-error me-1"><i className="fa-solid fa-trash"></i></button>
 
-                                </td>
-                            </tr>
-                        ))} */}
-
+                                    </td>
+                                </tr>
+                            ))}
 
                         </tbody>
                     </table>

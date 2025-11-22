@@ -29,6 +29,8 @@ var categorySchema = new mongoose.Schema({
     status: {
         type: String,
         required: true,
+        default: 'active',
+        enum: ['active', 'inactive']
     }
 },{
     timestamps: true

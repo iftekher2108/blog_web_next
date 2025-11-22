@@ -13,6 +13,7 @@ export default function RegisterComponent() {
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
 
+    
     async function handleSubmit(e) {
         e.preventDefault();
         setLoading(true)
