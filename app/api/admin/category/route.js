@@ -34,7 +34,7 @@ export async function POST(req) {
         const slug = slugify(body.name, { lower: true, strict: true });
         const data = categorySchema.parse({ ...body, slug })
 
-        const picture = await formData.get('picture');
+        const picture = formData.get('picture');
         // if (!picture) {
         //     return NextResponse.json({ message: "No file uploaded" }, { status: 400 });
         // }
@@ -43,7 +43,7 @@ export async function POST(req) {
             data.picture = picturePath
         }
 
-        const banner = await formData.get('banner');
+        const banner = formData.get('banner');
         // if (!banner) {
         //     return NextResponse.json({ message: "No file uploaded" }, { status: 400 });
         // }
@@ -77,14 +77,14 @@ export async function PUT(req) {
         const category = await Category.findById(id);
         console.log(data)
 
-        const picture = await formData.get('picture');
+        const picture = formData.get('picture');
         if (picture) {
            await safeDelete(category.picture)
            const picturePath = await FileUpload({ dirpath: 'category', file: picture, file_name: 'cat' })
             data.picture = picturePath
         }
 
-        const banner = await formData.get('banner');
+        const banner = formData.get('banner');
         if (banner) {
            await safeDelete(category.banner)
            const bannerPath = await FileUpload({ dirpath: "category", file: banner, file_name: 'cat_banner' })
@@ -92,7 +92,7 @@ export async function PUT(req) {
         }
 
         await Category.findByIdAndUpdate(id, data);
-        return NextResponse.json({ category, message: "Category Created Successfully" }, { status: 201 })
+        return NextResponse.json({ category, message: "Category Updated Successfully" }, { status: 201 })
 
     } catch (error) {
         if (error instanceof z.ZodError) {

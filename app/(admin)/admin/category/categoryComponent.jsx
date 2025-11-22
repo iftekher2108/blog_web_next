@@ -64,6 +64,7 @@ export default function CategoryComponent({ token }) {
             setName(data.category.name)
             setPictureUrl(data.category.picture)
             setBannerUrl(data.category.banner)
+            setStatus(data.category.status)
         }
     }
 
@@ -92,6 +93,7 @@ export default function CategoryComponent({ token }) {
             formData.append('status', status)
             if (picture) formData.append("picture", picture);
             if (banner) formData.append("banner", banner);
+
             if (id) {
                 const res = await fetch(`/api/admin/category?id=${id}`, {
                     method: 'PUT',
@@ -199,10 +201,6 @@ export default function CategoryComponent({ token }) {
                                 {errors.name && <span className="text-error">{errors.name}</span>}
                             </div>
 
-                            {
-                                id && <input type="hidden" value={id} name="id" />
-                            }
-
                             <div className="grid gap-2 md:grid-cols-2">
                                 <div className="col-span-1">
                                     <div className="form-control mb-3">
@@ -248,7 +246,7 @@ export default function CategoryComponent({ token }) {
 
                             <div className="form-control mb-3">
                                 <label className="floating-label">
-                                    <select name="status" onChange={(e) => setStatus(e.target.value)} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
+                                    <select name="status" value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>
                                     </select>
