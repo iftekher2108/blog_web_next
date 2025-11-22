@@ -6,6 +6,7 @@ import slugify from "slugify";
 import z from "zod";
 import { FileUpload } from "@/helper/upload";
 import errorOrganize from "@/helper/zError";
+import { safeDelete } from "@/helper/helper";
 
 export async function GET(req) {
     try {
@@ -67,26 +68,30 @@ export async function POST(req) {
 export async function PUT(req) {
     try {
         await Connection();
+        const id = req.nextUrl.searchParams.get("id");
         const formData = await req.formData();
         const body = Object.fromEntries(formData.entries());
         const slug = slugify(body.name, { lower: true, strict: true });
-        const data = categorySchema.parse({ ...body, slug })
-        const picture = await formData.get('picture');
 
+        const data = categorySchema.parse({ ...body, slug })
+        const category = await Category.findById(id);
+        console.log(data)
+
+        const picture = await formData.get('picture');
         if (picture) {
-            safeDelete()
+           await safeDelete(category.picture)
            const picturePath = await FileUpload({ dirpath: 'category', file: picture, file_name: 'cat' })
             data.picture = picturePath
         }
 
         const banner = await formData.get('banner');
-
         if (banner) {
+           await safeDelete(category.banner)
            const bannerPath = await FileUpload({ dirpath: "category", file: banner, file_name: 'cat_banner' })
             data.banner = bannerPath
         }
 
-        const category = await Category.findByIdAndUpdate(data.id, data, {new: true});
+        await Category.findByIdAndUpdate(id, data);
         return NextResponse.json({ category, message: "Category Created Successfully" }, { status: 201 })
 
     } catch (error) {
@@ -96,5 +101,19 @@ export async function PUT(req) {
         }
         console.error("Server Error:", error);
         return NextResponse.json({ message: "server Error", error }, { status: 500 });
+    }
+}
+
+export async function DELETE(req) {
+    try {
+        await Connection();
+        const id = req.nextUrl.searchParams.get('id');
+        const category = await Category.findByIdAndDelete(id)
+        await safeDelete(category.picture)
+        await safeDelete(category.banner)
+        return NextResponse.json({ message: "Category Deleted Successfully" },{status: 200});
+
+    } catch (error) {
+        console.error("server error", error)
     }
 }

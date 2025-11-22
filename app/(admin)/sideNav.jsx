@@ -20,7 +20,7 @@ export default function SideNav() {
                 {
                     icon: <Rss size={18} />,
                     name: "Blog",
-                    slug: "",
+                    slug: "/admin/blog",
                 }
             ]
         },
@@ -32,7 +32,7 @@ export default function SideNav() {
         {
             icon: <Settings2 size={18} />,
             name: 'Setting',
-            slug: '',
+            slug: '/admin/setting',
         }
 
     ]

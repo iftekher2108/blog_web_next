@@ -2,6 +2,7 @@
 import { Plus } from "lucide-react"
 import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
+import { createCookiesWithMutableAccessCheck } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 export default function CategoryComponent({ token }) {
     const [categories, setCategories] = useState([])
@@ -17,7 +18,7 @@ export default function CategoryComponent({ token }) {
 
     const [picture, setPicture] = useState(null)
     const [pictureUrl, setPictureUrl] = useState(null)
-    
+
 
     const getCategories = useCallback(async () => {
         try {
@@ -87,22 +88,74 @@ export default function CategoryComponent({ token }) {
         setErrors({})
         try {
             const formData = new FormData()
-
             formData.append("name", name);
             formData.append('status', status)
             if (picture) formData.append("picture", picture);
             if (banner) formData.append("banner", banner);
-            if (id) formData.append('id', id)
-            const res = await fetch('/api/admin/category', {
-                method: 'POST',
-                body: formData,
+            if (id) {
+                const res = await fetch(`/api/admin/category?id=${id}`, {
+                    method: 'PUT',
+                    body: formData,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                })
+                const data = await res.json();
+                console.log(data)
+                if (!res.ok) {
+                    // Zod error from backend
+                    if (data.errors) {
+                        setErrors(data.errors); // Zod returns an array of issues
+                    } else if (data.message) {
+                        setErrors({ message: data.message }); // single error case
+                    }
+                    return;
+                }
+                console.log("Update success:", data);
+            } else {
+
+                const res = await fetch('/api/admin/category', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                })
+                const data = await res.json();
+                console.log(data)
+                if (!res.ok) {
+                    // Zod error from backend
+                    if (data.errors) {
+                        setErrors(data.errors); // Zod returns an array of issues
+                    } else if (data.message) {
+                        setErrors({ message: data.message }); // single error case
+                    }
+                    return;
+                }
+                console.log("Create success:", data);
+            }
+            modelClose()
+        }
+        catch (err) {
+            setErrors({ message: "Something went wrong" });
+        } finally {
+            setLoading(false)
+            getCategories()
+        }
+    }
+
+    const handleDelete = async (id) => {
+        if (!confirm("Are you sure you want to delete this category?")) {
+            return;
+        }
+        try {
+            const res = await fetch(`/api/admin/category?id=${id}`, {
+                method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
             })
-
             const data = await res.json();
-            console.log(data)
             if (!res.ok) {
                 // Zod error from backend
                 if (data.errors) {
@@ -112,15 +165,13 @@ export default function CategoryComponent({ token }) {
                 }
                 return;
             }
-            console.log("Create success:", data);
-            modelClose()
-        }
-        catch (err) {
-            setErrors({ message: "Something went wrong" });
+            console.log("delete success:", data)
+        } catch (error) {
+            console.error('Failed to delete category:', error)
         } finally {
-            setLoading(false)
             getCategories()
         }
+
     }
 
 
@@ -213,6 +264,7 @@ export default function CategoryComponent({ token }) {
                     </div>
                 </dialog>
             </div>
+            
             <div className="mt-5">
                 <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
                     <table className="table">
@@ -231,13 +283,13 @@ export default function CategoryComponent({ token }) {
                             {categories.map((category, i) => (
                                 <tr key={category._id}>
                                     <td>{i + 1}</td>
-                                    <td>{category.picture && <Image src={`/${category.picture}`} className="rounded" width={80} height={80} alt={`${category.name}`} /> }</td>
-                                    <td>{category.banner && <Image src={`/${category.banner}`} className="rounded" width={80} height={80} alt={`${category.name}`} /> }</td>
+                                    <td>{category.picture && <Image src={`/${category.picture}`} className="rounded" width={80} height={80} alt={`${category.name}`} />}</td>
+                                    <td>{category.banner && <Image src={`/${category.banner}`} className="rounded" width={80} height={80} alt={`${category.name}`} />}</td>
                                     <td>{category.name}</td>
                                     <td><span className={`badge ${category.status == 'active' ? 'badge-success' : 'badge-error'}`}>{category.status} </span></td>
                                     <td>
                                         <button onClick={() => modelOpen(category._id)} className="btn btn-sm btn-info me-1"><i className="fa-solid fa-pen-to-square"></i></button>
-                                        <button className="btn btn-sm btn-error me-1"><i className="fa-solid fa-trash"></i></button>
+                                        <button onClick={()=> handleDelete(category._id)} className="btn btn-sm btn-error me-1"><i className="fa-solid fa-trash"></i></button>
 
                                     </td>
                                 </tr>

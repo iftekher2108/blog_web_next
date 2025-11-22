@@ -2,10 +2,16 @@
 import UserCreate from "./UserCreate";
 import UserList from "./userList";
 
-export default function Page() {
+import UserComponent from "./userComponent";
+import { cookies } from "next/headers";
+
+export default async function Page() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')
     return (
         <div>
-            <UserList />
+            <UserComponent token={token} />
+            {/* <UserList /> */}
             {/* <UserCreate /> */}
         </div>
     )
