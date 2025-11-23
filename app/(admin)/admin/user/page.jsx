@@ -1,7 +1,4 @@
 
-import UserCreate from "./UserCreate";
-import UserList from "./userList";
-
 import UserComponent from "./userComponent";
 import { cookies } from "next/headers";
 

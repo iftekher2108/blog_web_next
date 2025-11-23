@@ -27,10 +27,10 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
+    const formData = await req.formData();
+    const body = Object.fromEntries(formData.entries());
     try {
         await Connection();
-        const formData = await req.formData();
-        const body = Object.fromEntries(formData.entries());
         const slug = slugify(body.name, { lower: true, strict: true });
         const data = categorySchema.parse({ ...body, slug })
 
@@ -56,21 +56,23 @@ export async function POST(req) {
         return NextResponse.json({ category, message: "Category Created Successfully" }, { status: 201 })
 
     } catch (error) {
+        await safeDelete(formData.get('picture'));
+        await safeDelete(formData.get('banner'));
         if (error instanceof z.ZodError) {
             const errors = errorOrganize(error.issues);
             return NextResponse.json({ errors }, { status: 400 });
         }
         console.error("Server Error:", error);
-        return NextResponse.json({ message: "server Error", error }, { status: 500 });
+        return NextResponse.json({ message: "server Error " + error }, { status: 500 });
     }
 }
 
 export async function PUT(req) {
+    const formData = await req.formData();
+    const body = Object.fromEntries(formData.entries());
     try {
         await Connection();
         const id = req.nextUrl.searchParams.get("id");
-        const formData = await req.formData();
-        const body = Object.fromEntries(formData.entries());
         const slug = slugify(body.name, { lower: true, strict: true });
 
         const data = categorySchema.parse({ ...body, slug })
@@ -95,12 +97,14 @@ export async function PUT(req) {
         return NextResponse.json({ category, message: "Category Updated Successfully" }, { status: 201 })
 
     } catch (error) {
+        await safeDelete(formData.get('picture'));
+        await safeDelete(formData.get('banner'));
         if (error instanceof z.ZodError) {
             const errors = errorOrganize(error.issues);
             return NextResponse.json({ errors }, { status: 400 });
         }
         console.error("Server Error:", error);
-        return NextResponse.json({ message: "server Error", error }, { status: 500 });
+        return NextResponse.json({ message: "server Error " + error }, { status: 500 });
     }
 }
 

@@ -2,7 +2,7 @@
 import { z } from "zod";
 
 export const categorySchema = z.object({
-    name: z.string(),
+    name: z.string().min(2, { message: "Name should be at least 2 characters long" }),
     slug: z.string(),
     banner: z.file()
         .mime(["image/png", "image/jpeg"])

@@ -76,6 +76,7 @@ export default function CategoryComponent({ token }) {
         setStatus('active');
         setPictureUrl(null)
         setBannerUrl(null)
+        document.querySelector('input[type="file"]').value = null;
     }
 
     const modelClose = () => {
@@ -196,7 +197,7 @@ export default function CategoryComponent({ token }) {
                         <div className="my-3">
                             <div className="form-control mb-3">
                                 <label className="floating-label">
-                                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
+                                    <input type="text" value={name ?? ''} onChange={(e) => setName(e.target.value)} placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
                                 </label>
                                 {errors.name && <span className="text-error">{errors.name}</span>}
                             </div>
@@ -246,7 +247,7 @@ export default function CategoryComponent({ token }) {
 
                             <div className="form-control mb-3">
                                 <label className="floating-label">
-                                    <select name="status" value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
+                                    <select name="status" value={status ?? ''} onChange={(e) => setStatus(e.target.value)} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>
                                     </select>
