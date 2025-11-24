@@ -1,4 +1,4 @@
-import { ChartColumnStacked, House, List, Rss, User, Settings2 } from "lucide-react"
+import { ChartColumnStacked, House, List, Rss, User, Settings2, Presentation } from "lucide-react"
 import Link from "next/link"
 export default function SideNav() {
 
@@ -7,6 +7,11 @@ export default function SideNav() {
             icon: <House size={18} />,
             name: "Dashboard",
             slug: "/admin",
+        },
+        {
+            icon: <Presentation size={18} />,
+            name: "Slider",
+            slug: "/admin/slider",
         },
         {
             icon: <ChartColumnStacked size={18} />,

@@ -35,7 +35,12 @@ const blogSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
-
+    comments: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Comment",
+        }
+    ],
     views_count: {
         type: Number,
         default: 0,
@@ -58,7 +63,6 @@ const blogSchema = new mongoose.Schema({
             ref: "Blog",
         },
     ],
-
     is_comment_enabled: {
         type: Boolean,
         default: true,
@@ -71,7 +75,7 @@ const blogSchema = new mongoose.Schema({
 
     status: {
         type: String,
-        enum: ["draft", "published", "archived", "pending"],
+        enum: ["draft", "published", "archived", "pending", 'review', 'unpublished'],
         default: "draft",
     },
 
@@ -81,4 +85,4 @@ const blogSchema = new mongoose.Schema({
 
 blogSchema.index({name:1, status:1, slug: 1 })
 
-export default mongoose.model.Blog || mongoose.model("Blog", blogSchema);
+export default mongoose.models.Blog || mongoose.model("Blog", blogSchema);

@@ -1,15 +1,11 @@
-import Link from "next/link"
-
-export default function Profile() {
+import ProfileComponent from "./profileComponent";
+import { cookies } from "next/headers";
+export default async function Profile() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')
     return(
         <>
-        <div className="flex justify-between">
-
-           <button className="btn btn-primary"></button>
-        </div>
-        <div>
-        this is profile page
-        </div>
+            <ProfileComponent token={token} />
         </>
     )
 }

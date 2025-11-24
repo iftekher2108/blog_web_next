@@ -5,7 +5,7 @@ import { useMessage } from "../../statusContext";
 
 import { useEffect, useState, useCallback } from "react"
 export default function UserComponent({ token }) {
-    const { message, setMessage } = useMessage();
+    const { setMessage } = useMessage();
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
@@ -118,7 +118,6 @@ export default function UserComponent({ token }) {
                 console.log("Update success:", data);
                 setMessage(data.message);
             } else {
-
                 const res = await fetch('/api/admin/user', {
                     method: 'POST',
                     body: formData,
@@ -144,7 +143,7 @@ export default function UserComponent({ token }) {
             modelClose()
         }
         catch (err) {
-            setErrors({ message: "Something went wrong" });
+            setMessage("Something went wrong"+ err)
         } finally {
             setLoading(false)
             getUsers()
@@ -169,13 +168,15 @@ export default function UserComponent({ token }) {
                 if (data.errors) {
                     setErrors(data.errors); // Zod returns an array of issues
                 } else if (data.message) {
-                    setErrors({ message: data.message }); // single error case
+                    setMessage(data.message);
                 }
                 return;
             }
             console.log("delete success:", data)
+            setMessage(data.message);
         } catch (error) {
             console.error('Failed to delete user:', error)
+            setMessage(error);
         } finally {
             getUsers()
         }

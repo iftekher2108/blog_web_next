@@ -1,10 +1,11 @@
 "use client"
-import { Plus } from "lucide-react"
+import { Plus, Pencil, Trash } from "lucide-react"
 import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
-import { createCookiesWithMutableAccessCheck } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { useMessage } from "../../statusContext";
 
 export default function CategoryComponent({ token }) {
+    const { setMessage } = useMessage();
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
@@ -110,11 +111,12 @@ export default function CategoryComponent({ token }) {
                     if (data.errors) {
                         setErrors(data.errors); // Zod returns an array of issues
                     } else if (data.message) {
-                        setErrors({ message: data.message }); // single error case
+                        setMessage(data.message)
                     }
                     return;
                 }
                 console.log("Update success:", data);
+                setMessage(data.message)
             } else {
 
                 const res = await fetch('/api/admin/category', {
@@ -136,11 +138,12 @@ export default function CategoryComponent({ token }) {
                     return;
                 }
                 console.log("Create success:", data);
+                setMessage(data.message)
             }
             modelClose()
         }
         catch (err) {
-            setErrors({ message: "Something went wrong" });
+            setMessage("Something went wrong" + err)
         } finally {
             setLoading(false)
             getCategories()
@@ -287,8 +290,8 @@ export default function CategoryComponent({ token }) {
                                     <td>{category.name}</td>
                                     <td><span className={`badge ${category.status == 'active' ? 'badge-success' : 'badge-error'}`}>{category.status} </span></td>
                                     <td>
-                                        <button onClick={() => modelOpen(category._id)} className="btn btn-sm btn-info me-1"><i className="fa-solid fa-pen-to-square"></i></button>
-                                        <button onClick={()=> handleDelete(category._id)} className="btn btn-sm btn-error me-1"><i className="fa-solid fa-trash"></i></button>
+                                        <button onClick={() => modelOpen(category._id)} className="btn btn-sm btn-info me-1"><Pencil size={15} /></button>
+                                        <button onClick={()=> handleDelete(category._id)} className="btn btn-sm btn-error me-1"><Trash size={15} /></button>
 
                                     </td>
                                 </tr>

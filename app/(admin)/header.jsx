@@ -36,7 +36,6 @@ export default function Header() {
                                 <span className="badge">New</span>
                             </Link>
                         </li>
-                        <li><a>Setting </a></li>
                         <li><button onClick={handleLogout} >Logout</button></li>
                     </ul>
                 </div>

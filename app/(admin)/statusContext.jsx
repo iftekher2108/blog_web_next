@@ -5,6 +5,16 @@ const StatusContext = createContext();
 
 export const StatusProvider = ({ children }) => {
     const [message, setMessage] = useState(null);
+
+    // const showMessage = useCallback((msg, duration = 3000) => {
+    //     setMessage(msg);
+
+    //     // duration পেরোলেই null করে দেবে
+    //     setTimeout(() => {
+    //         setMessage(null);
+    //     }, duration);
+    // }, []);
+
     return(
         <StatusContext.Provider value={{ message, setMessage }} >
             { children }
