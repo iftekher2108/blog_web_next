@@ -1,12 +1,15 @@
 'use client'
 
 import { Plus, Pencil, Trash } from "lucide-react"
-import { useState, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { useMessage } from "../../statusContext";
 import Select from 'react-select'
+import Editor from "@/component/Editor";
+
 
 export default function BlogComponent({ token }) {
+
 
     const { setMessage } = useMessage();
     const [blogs, setBlogs] = useState([])
@@ -18,7 +21,7 @@ export default function BlogComponent({ token }) {
     const [getCategories, setGetCategories] = useState([])
 
     const categoryOptions = getCategories.map((category, i) => {
-        return {value: category._id, label: category.name }
+        return { value: category._id, label: category.name }
     })
 
     const [id, setId] = useState(null);
@@ -111,7 +114,7 @@ export default function BlogComponent({ token }) {
     }
 
 
-        const handleSubmit = async () => {
+    const handleSubmit = async () => {
         setLoading(true)
         setErrors({})
         // try {
@@ -203,8 +206,7 @@ export default function BlogComponent({ token }) {
                             </div>
 
                             <div className="col-span-2 form-control mb-3">
-                                    <Select closeMenuOnSelect={false} isMulti onChange={(selectedOptions) => setCategories(selectedOptions)}  options={categoryOptions} value={categories} />
-
+                                <Select instanceId="category-select" closeMenuOnSelect={false} isMulti onChange={(selectedOptions) => setCategories(selectedOptions)} options={categoryOptions} value={categories} />
                                 {errors.status && <span className="text-error">{errors.status}</span>}
                             </div>
 
@@ -251,25 +253,23 @@ export default function BlogComponent({ token }) {
                                 </div>
                             </div>
 
-                             <div className="col-span-2 form-control mb-3">
+                            <div className="col-span-2 form-control mb-3">
+                                <Editor content={content} setContent={setContent} />
+                                {errors.keywords && <span className="text-error">{errors.keywords}</span>}
+                            </div>
+
+                            <div className="col-span-2 form-control mb-3">
                                 <label className="floating-label">
-                                    <input type="text" value={keywords ?? ''} onChange={(e) => setKeywords(e.target.value)} placeholder="Keywords" name="keywords" className="input focus:input-primary w-full focus:border-0" />
+                                    <textarea defaultValue={keywords ?? ''} onChange={(e) => setKeywords(e.target.value)} placeholder="Keywords" name="keywords" className="textarea focus:textarea-primary w-full focus:border-0" />
                                 </label>
                                 {errors.keywords && <span className="text-error">{errors.keywords}</span>}
                             </div>
 
                             <div className="col-span-2 form-control mb-3">
                                 <label className="floating-label">
-                                    <textarea value={keywords ?? ''} onChange={(e) => setKeywords(e.target.value)} placeholder="Keywords" name="keywords" className="textarea focus:textarea-primary w-full focus:border-0">{keywords ?? ''}</textarea>
+                                    <textarea defaultValue={tags ?? ''} onChange={(e) => setTags(e.target.value)} placeholder="tags" name="tags" className="textarea focus:textarea-primary w-full focus:border-0" />
                                 </label>
-                                {errors.keywords && <span className="text-error">{errors.keywords}</span>}
-                            </div>
-
-                            <div className="col-span-2 form-control mb-3">
-                                <label className="floating-label">
-                                    <textarea onChange={(e) => setTags(e.target.value)} placeholder="Keywords" name="keywords" className="input focus:input-primary w-full focus:border-0" />
-                                </label>
-                                {errors.keywords && <span className="text-error">{errors.keywords}</span>}
+                                {errors.tags && <span className="text-error">{errors.tags}</span>}
                             </div>
 
                             <div className="form-control mb-3">
@@ -318,7 +318,7 @@ export default function BlogComponent({ token }) {
                                     <td>{blog.picture && <Image src={`/${blog.picture}`} className="rounded" width={80} height={80} alt={`${blog.name}`} />}</td>
                                     <td>{blog.banner && <Image src={`/${blog.banner}`} className="rounded" width={80} height={80} alt={`${blog.name}`} />}</td>
                                     <td>{blog.name}</td>
-                                    <td>{blog?.categories.map((category,i)=>(
+                                    <td>{blog?.categories.map((category, i) => (
                                         <span>{category.name},</span>
                                     ))}</td>
                                     <td><span className={`badge ${blog.status == 'active' ? 'badge-success' : 'badge-error'}`}>{blog.status} </span></td>
