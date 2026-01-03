@@ -5,7 +5,13 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { useMessage } from "../../statusContext";
 import Select from 'react-select'
-import Editor from "@/component/Editor";
+import dynamic from 'next/dynamic';
+import MySelect from "@/component/MySelect";
+// SSR বন্ধ করে এডিটর ইম্পোর্ট করা হচ্ছে
+const TextEditor = dynamic(() => import('@/component/Editor'), { 
+  ssr: false,
+  loading: () => <p>Loading Editor...</p>
+});
 
 
 export default function BlogComponent({ token }) {
@@ -206,7 +212,7 @@ export default function BlogComponent({ token }) {
                             </div>
 
                             <div className="col-span-2 form-control mb-3">
-                                <Select instanceId="category-select" closeMenuOnSelect={false} isMulti onChange={(selectedOptions) => setCategories(selectedOptions)} options={categoryOptions} value={categories} />
+                                <MySelect instanceId="category-select" closeMenuOnSelect={false} isMulti onChange={(selectedOptions) => setCategories(selectedOptions)} options={categoryOptions} value={categories} />
                                 {errors.status && <span className="text-error">{errors.status}</span>}
                             </div>
 
@@ -254,9 +260,17 @@ export default function BlogComponent({ token }) {
                             </div>
 
                             <div className="col-span-2 form-control mb-3">
-                                <Editor content={content} setContent={setContent} />
+                                <label className="floating-label">
+                                    <textarea defaultValue={description ?? ''} onChange={(e) => setDescription(e.target.value)} placeholder="Description" name="description" className="textarea focus:textarea-primary w-full focus:border-0" />
+                                </label>
+                                {errors.description && <span className="text-error">{errors.description}</span>}
+                            </div>
+
+                            <div className="col-span-2 form-control mb-3">
+                                <TextEditor initialValue={content} onChange={(content) => setContent(content)} />
                                 {errors.keywords && <span className="text-error">{errors.keywords}</span>}
                             </div>
+
 
                             <div className="col-span-2 form-control mb-3">
                                 <label className="floating-label">
