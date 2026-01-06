@@ -5,8 +5,223 @@ import Image from "next/image";
 import { useMessage } from "../../statusContext";
 
 export default function SliderComponent({ token }) {
+
+    const { setMessage } = useMessage();
+    const [sliders, setSliders] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [errors, setErrors] = useState({})
+
+    const [id, setId] = useState(null)
+    const [title, setTitle] = useState('')
+    const [subTitle, setSubTitle] = useState('')
+    const [description, setDescription] = useState('')
+    const [action1, setAction1] = useState('')
+    const [action2, setAction2] = useState('')
+
+    const [status, setStatus] = useState('active')
+
+    const [picture, setPicture] = useState(null)
+    const [pictureUrl, setPictureUrl] = useState(null)
+
+
+
+     const getSliders = useCallback(async () => {
+        // try {
+        //     const res = await fetch('/api/admin/slider', {
+        //         method: "GET",
+        //         headers: {
+        //             Authorization: `Bearer ${token}`,
+        //         }
+        //     })
+        //     const data = await res.json();
+        //     setCategories(data.categories || []);
+        //     console.log(categories);
+
+        // } catch (error) {
+        //     console.error("Failed to fetch categories:", error);
+        // }
+    })
+
+    useEffect(() => {
+        getSliders();
+    }, [])
+
+
+     const reset = () => {
+        setId(null)
+        setTitle('');
+
+        setPicture(null);
+        setPictureUrl(null)
+        setStatus('active');
+        document.querySelector('input[type="file"]').value = null;
+    }
+
+
+    const modelOpen = async (id = null) => {
+        if (id == null) {
+            reset()
+            document.getElementById('categoryModel').setAttribute('open', true)
+        } else {
+            reset()
+            setId(id)
+            document.getElementById('categoryModel').setAttribute('open', true)
+            const res = await fetch(`/api/admin/category?id=${id}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            const data = await res.json()
+            console.log(data)
+            setId(data.category._id)
+            setName(data.category.name)
+            setPictureUrl(data.category.picture)
+            setStatus(data.category.status)
+        }
+    }
+
+    const modelClose = () => {
+        document.getElementById('categoryModel').removeAttribute('open');
+        reset();
+    }
+
+
+     const handleSubmit = async () => {
+        setLoading(true)
+        setErrors({})
+        try {
+            const formData = new FormData(e.currentTarget)
+            formData.append("title", title);
+            formData.append('status', status)
+            if (picture) formData.append("picture", picture);
+
+            if (id) {
+                const res = await fetch(`/api/admin/slider?id=${id}`, {
+                    method: 'PUT',
+                    body: formData,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                })
+                const data = await res.json();
+                console.log(data)
+                if (!res.ok) {
+                    // Zod error from backend
+                    if (data.errors) {
+                        setErrors(data.errors); // Zod returns an array of issues
+                    } else if (data.message) {
+                        setMessage(data.message)
+                    }
+                    return;
+                }
+                console.log("Update success:", data);
+                setMessage(data.message)
+            } else {
+
+                const res = await fetch('/api/admin/slider', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                })
+                const data = await res.json();
+                console.log(data)
+                if (!res.ok) {
+                    // Zod error from backend
+                    if (data.errors) {
+                        setErrors(data.errors); // Zod returns an array of issues
+                    } else if (data.message) {
+                        setErrors({ message: data.message }); // single error case
+                    }
+                    return;
+                }
+                console.log("Create success:", data);
+                setMessage(data.message)
+            }
+            modelClose()
+        }
+        catch (err) {
+            setMessage("Something went wrong" + err)
+        } finally {
+            setLoading(false)
+            getCategories()
+        }
+    }
+
+
+
+
+
+
     return (
         <>
+
+         {
+                errors.message && <div role="alert" className={`alert alert-error alert-soft mb-3`}>
+                    <span>{errors.message}</span>
+                </div>
+            }
+
+        <div className="flex justify-between">
+                <h3 className="text-primary text-xl font-bold">Category List</h3>
+                <button onClick={() => modelOpen()} className="btn btn-primary"><Plus size={20} /> Add Category</button>
+
+                <dialog id="categoryModel" className="modal">
+                    <div className="modal-box">
+                        <button onClick={() => modelClose()} className="btn btn-circle btn-ghost absolute right-2 top-2">✕</button>
+
+                        <h3 className="font-bold text-lg">Category</h3>
+                        <div className="my-3">
+                            <div className="form-control mb-3">
+                                <label className="floating-label">
+                                    <input type="text" value={name ?? ''} onChange={(e) => setName(e.target.value)} placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
+                                </label>
+                                {errors.name && <span className="text-error">{errors.name}</span>}
+                            </div>
+
+                            <div className="grid gap-2 md:grid-cols-2">
+                                <div className="col-span-1">
+                                    <div className="form-control mb-3">
+                                        <label className="label">Picture (400x500 px)</label>
+                                        {picture &&
+                                            <img src={`${URL.createObjectURL(picture)}`} className="rounded mb-3" height={80} alt="picture" />
+                                        }
+                                        {/* Else If editing and existing URL exists → preview old image */}
+                                        {!picture && pictureUrl && (
+                                            <img
+                                                src={`/${pictureUrl}`}
+                                                className="rounded mb-3"
+                                                height={80}
+                                                alt="picture"
+                                            />
+                                        )}
+                                        <input type="file" onChange={(e) => setPicture(e.target.files[0])} name="picture" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
+                                    </div>
+                                    {errors.picture && <span className="text-error">{errors.picture}</span>}
+                                </div>
+
+                            </div>
+
+                            <div className="form-control mb-3">
+                                <label className="floating-label">
+                                    <select name="status" value={status ?? ''} onChange={(e) => setStatus(e.target.value)} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </label>
+                                {errors.status && <span className="text-error">{errors.status}</span>}
+                            </div>
+
+
+                            <div className="flex justify-end">
+                                <button onClick={handleSubmit} className="btn btn-primary">{loading ? <span className="loading loading-spinner loading-md"></span> : "Submit"}</button>
+                            </div>
+                        </div>
+                    </div>
+                </dialog>
+            </div>
 
 
             <div className="mt-5">

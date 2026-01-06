@@ -26,7 +26,6 @@ export default function CategoryComponent({ token }) {
             const res = await fetch('/api/admin/category', {
                 method: "GET",
                 headers: {
-                    "content-type": "application/json",
                     Authorization: `Bearer ${token}`,
                 }
             })
@@ -55,7 +54,6 @@ export default function CategoryComponent({ token }) {
             const res = await fetch(`/api/admin/category?id=${id}`, {
                 method: "GET",
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`
                 }
             })

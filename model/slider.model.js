@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const sliderSchema = new mongoose.Schema({
-    name: {
+    title: {
         type: String,
     },
     picture: {
