@@ -14,12 +14,13 @@ const sliderSchema = new mongoose.Schema({
     description: {
         type: String
     },
-    action1 :{type:String},
-    action2: {type: String},
+    actionLink :{type:String},
+    actionLabel :{type:String},
+
     status: {
         type: true,
         required: true,
     }
 })
 
-export default mongoose.model.Slider || mongoose.model("Slider",sliderSchema)
+export default mongoose.model.Slider || mongoose.model("Slider", sliderSchema)
