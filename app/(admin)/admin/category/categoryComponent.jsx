@@ -1,6 +1,6 @@
 "use client"
 import { Plus, Pencil, Trash } from "lucide-react"
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useMessage } from "../../statusContext";
 
@@ -9,8 +9,10 @@ export default function CategoryComponent({ token }) {
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
-
+    
     const [id, setId] = useState(null)
+    const [category, setCategory] = useState(null);
+    const formRef = useRef(null)
     const [name, setName] = useState('')
     const [status, setStatus] = useState('active')
 
@@ -60,22 +62,19 @@ export default function CategoryComponent({ token }) {
             const data = await res.json()
             console.log(data)
             setId(data.category._id)
-            setName(data.category.name)
+            setCategory(data.category)
             setPictureUrl(data.category.picture)
             setBannerUrl(data.category.banner)
-            setStatus(data.category.status)
         }
     }
 
     const reset = () => {
         setId(null)
-        setName('');
-        setPicture(null);
-        setBanner(null);
-        setStatus('active');
+        setPicture(null)
         setPictureUrl(null)
+        setBanner(null)
         setBannerUrl(null)
-        document.querySelector('input[type="file"]').value = null;
+        formRef.current?.reset()
     }
 
     const modelClose = () => {
@@ -84,16 +83,12 @@ export default function CategoryComponent({ token }) {
     }
 
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault()
         setLoading(true)
         setErrors({})
         try {
-            const formData = new FormData()
-            formData.append("name", name);
-            formData.append('status', status)
-            if (picture) formData.append("picture", picture);
-            if (banner) formData.append("banner", banner);
-
+            const formData = new FormData(e.currentTarget)
             if (id) {
                 const res = await fetch(`/api/admin/category?id=${id}`, {
                     method: 'PUT',
@@ -195,10 +190,13 @@ export default function CategoryComponent({ token }) {
                         <button onClick={() => modelClose()} className="btn btn-circle btn-ghost absolute right-2 top-2">✕</button>
 
                         <h3 className="font-bold text-lg">Category</h3>
+                        <form onSubmit={handleSubmit} ref={formRef} method="POST">
+
+                        </form>
                         <div className="my-3">
                             <div className="form-control mb-3">
                                 <label className="floating-label">
-                                    <input type="text" value={name ?? ''} onChange={(e) => setName(e.target.value)} placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
+                                    <input type="text" defaultValue={category?.name ?? ''} placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
                                 </label>
                                 {errors.name && <span className="text-error">{errors.name}</span>}
                             </div>
@@ -207,19 +205,20 @@ export default function CategoryComponent({ token }) {
                                 <div className="col-span-1">
                                     <div className="form-control mb-3">
                                         <label className="label">Picture (400x500 px)</label>
-                                        {picture &&
-                                            <img src={`${URL.createObjectURL(picture)}`} className="rounded mb-3" height={80} alt="picture" />
-                                        }
                                         {/* Else If editing and existing URL exists → preview old image */}
-                                        {!picture && pictureUrl && (
+                                        {pictureUrl && (
                                             <img
-                                                src={`/${pictureUrl}`}
+                                                src={picture ? pictureUrl : `/${pictureUrl}`}
                                                 className="rounded mb-3"
                                                 height={80}
                                                 alt="picture"
                                             />
                                         )}
-                                        <input type="file" onChange={(e) => setPicture(e.target.files[0])} name="picture" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
+                                        <input type="file" onChange={(e) => {
+                                            const file = e.target.files?.[0]
+                                            setPicture(file)
+                                            setPictureUrl(URL.createObjectURL(file))
+                                        }} name="picture" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
                                     </div>
                                     {errors.picture && <span className="text-error">{errors.picture}</span>}
                                 </div>
@@ -227,19 +226,21 @@ export default function CategoryComponent({ token }) {
                                 <div className="col-span-1">
                                     <div className="form-control mb-3">
                                         <label className="label">Banner (1920x1080 px)</label>
-                                        {banner &&
-                                            <img src={`${URL.createObjectURL(banner)}`} className="rounded mb-3" height={80} alt="banner" />
-                                        }
+
                                         {/* Else If editing and existing URL exists → preview old image */}
-                                        {!banner && bannerUrl && (
+                                        {bannerUrl && (
                                             <img
-                                                src={`/${bannerUrl}`}
+                                                src={ banner ? bannerUrl : `/${bannerUrl}`}
                                                 className="rounded mb-3"
                                                 height={80}
                                                 alt="banner"
                                             />
                                         )}
-                                        <input type="file" onChange={(e) => setBanner(e.target.files[0])} name="banner" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
+                                        <input type="file" onChange={(e) => {
+                                            const file = e.target.files?.[0]
+                                            setBanner(file)
+                                            setBannerUrl(URL.createObjectURL(file))
+                                        } } name="banner" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
                                     </div>
                                     {errors.banner && <span className="text-error">{errors.banner}</span>}
 
@@ -248,7 +249,7 @@ export default function CategoryComponent({ token }) {
 
                             <div className="form-control mb-3">
                                 <label className="floating-label">
-                                    <select name="status" value={status ?? ''} onChange={(e) => setStatus(e.target.value)} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
+                                    <select name="status" defaultValue={category?.status ?? ''} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>
                                     </select>
@@ -258,7 +259,7 @@ export default function CategoryComponent({ token }) {
 
 
                             <div className="flex justify-end">
-                                <button onClick={handleSubmit} className="btn btn-primary">{loading ? <span className="loading loading-spinner loading-md"></span> : "Submit"}</button>
+                                <button className="btn btn-primary">{loading ? <span className="loading loading-spinner loading-md"></span> : "Submit"}</button>
                             </div>
                         </div>
                     </div>

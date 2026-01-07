@@ -6,7 +6,6 @@ const sliderSchema = new mongoose.Schema({
     },
     picture: {
         type: String,
-        required: true,
     },
     subTitle: {
         type: String,
@@ -18,9 +17,10 @@ const sliderSchema = new mongoose.Schema({
     actionLabel :{type:String},
 
     status: {
-        type: true,
+        type: String,
         required: true,
     }
 })
 
-export default mongoose.model.Slider || mongoose.model("Slider", sliderSchema)
+const Slider = mongoose.models.Slider || mongoose.model("Slider", sliderSchema)
+export default Slider

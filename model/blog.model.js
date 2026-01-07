@@ -85,4 +85,5 @@ const blogSchema = new mongoose.Schema({
 
 blogSchema.index({name:1, status:1, slug: 1 })
 
-export default mongoose.models.Blog || mongoose.model("Blog", blogSchema);
+const Blog = mongoose.models.Blog || mongoose.model("Blog", blogSchema);
+export default Blog;

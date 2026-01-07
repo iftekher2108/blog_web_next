@@ -7,6 +7,7 @@ export const sliderSchema = z.object({
     picture: z.file()
         .mime(["image/png", "image/jpeg"])
         .max(2 * 1024 * 1024),
+    description: z.string().nullable().optional(),
     actionLink: z.string().nullable().optional(),
     actionLabel: z.string().nullable().optional(),
     status: z.string(),

@@ -1,12 +1,13 @@
 'use client'
 import { Plus, Pencil, Trash } from "lucide-react"
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useMessage } from "../../statusContext";
 
 export default function SliderComponent({ token }) {
 
     const { setMessage } = useMessage();
+    const formRef = useRef(null)
     const [sliders, setSliders] = useState([])
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
@@ -20,7 +21,7 @@ export default function SliderComponent({ token }) {
     // const [action1, setAction1] = useState('')
     // const [action2, setAction2] = useState('')
     // const [status, setStatus] = useState('active')
-    // const [picture, setPicture] = useState(null)
+    const [picture, setPicture] = useState(null)
     const [pictureUrl, setPictureUrl] = useState(null)
 
 
@@ -40,19 +41,21 @@ export default function SliderComponent({ token }) {
         } catch (error) {
             console.error("Failed to fetch categories:", error);
         }
-    })
+    }, [token])
 
     useEffect(() => {
         getSliders();
     }, [])
 
 
+
     const reset = () => {
         setId(null);
+        setPicture(null);
         setPictureUrl(null);
         setSlider(null);
         setErrors({});
-        document.querySelector('input[type="file"]').value = null;
+        formRef.current?.reset();
     }
 
 
@@ -73,7 +76,7 @@ export default function SliderComponent({ token }) {
             const data = await res.json()
             console.log(data)
             setSlider(data.slider)
-            setPictureUrl(slider.picture)
+            setPictureUrl(data.slider.picture)
         }
     }
 
@@ -89,7 +92,7 @@ export default function SliderComponent({ token }) {
         setErrors({})
         try {
             const formData = new FormData(e.currentTarget)
-            if (picture) formData.append("picture", picture);
+            // if (picture) formData.append("picture", picture);
             if (id) {
                 const res = await fetch(`/api/admin/slider?id=${id}`, {
                     method: 'PUT',
@@ -140,9 +143,40 @@ export default function SliderComponent({ token }) {
             setMessage("Something went wrong" + err)
         } finally {
             setLoading(false)
-            getCategories()
+            getSliders()
         }
     }
+
+
+    const handleDelete = async (id) => {
+        if (!confirm("Are you sure you want to delete this slider?")) {
+            return;
+        }
+        try {
+            const res = await fetch(`/api/admin/slider?id=${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            const data = await res.json();
+            if (!res.ok) {
+                // Zod error from backend
+                if (data.errors) {
+                    setErrors(data.errors); // Zod returns an array of issues
+                } else if (data.message) {
+                    setErrors({ message: data.message }); // single error case
+                }
+                return;
+            }
+            console.log("delete success:", data)
+        } catch (error) {
+            console.error('Failed to delete slider:', error)
+        } finally {
+            getSliders()
+        }
+    }
+
 
 
     return (
@@ -156,14 +190,14 @@ export default function SliderComponent({ token }) {
 
             <div className="flex justify-between">
                 <h3 className="text-primary text-xl font-bold">Slider List</h3>
-                <button onClick={() => modelOpen()} className="btn btn-primary"><Plus size={20} /> Add Category</button>
+                <button onClick={() => modelOpen()} className="btn btn-primary"><Plus size={20} /> Add Slider</button>
 
                 <dialog id="sliderModel" className="modal">
                     <div className="modal-box max-w-1/2">
                         <button onClick={() => modelClose()} className="btn btn-circle btn-ghost absolute right-2 top-2">✕</button>
 
                         <h3 className="font-bold text-lg">Slider</h3>
-                        <form onSubmit={handleSubmit} method="post">
+                        <form onSubmit={handleSubmit} ref={formRef} method="post">
 
                             <div className="my-3">
                                 <div className="grid grid-cols-2 gap-2">
@@ -196,16 +230,27 @@ export default function SliderComponent({ token }) {
                                             {/* Else If editing and existing URL exists → preview old image */}
                                             {pictureUrl && (
                                                 <img
-                                                    src={`${pictureUrl}`}
+                                                    src={picture ? pictureUrl : `/${pictureUrl}`}
                                                     className="rounded mb-3"
                                                     height={80}
                                                     alt="picture"
                                                 />
                                             )}
-                                            <input type="file" onChange={(e) => setPictureUrl(URL.createObjectURL(e.target.files?.[0]))} name="picture" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
+                                            <input type="file" onChange={(e) => {
+                                                const file = e.target.files?.[0]
+                                                setPicture(file)
+                                                setPictureUrl(URL.createObjectURL(file))
+                                            }} name="picture" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
                                         </div>
                                         {errors.picture && <span className="text-error">{errors.picture}</span>}
                                     </div>
+                                </div>
+
+                                <div className="form-control mb-3">
+                                    <label className="floating-label">
+                                        <textarea defaultValue={slider?.description ?? ''}  placeholder="Description" name="description" className="textarea focus:textarea-primary w-full focus:border-0" />
+                                    </label>
+                                    {errors.description && <span className="text-error">{errors.description}</span>}
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-2">
@@ -259,7 +304,8 @@ export default function SliderComponent({ token }) {
                             <tr className="bg-primary">
                                 <th>Sl</th>
                                 <th>Picture</th>
-                                <th>Name</th>
+                                <th>Title</th>
+                                <th>Sub Title</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -268,13 +314,13 @@ export default function SliderComponent({ token }) {
                             {sliders.map((slider, i) => (
                                 <tr key={slider._id}>
                                     <td>{i + 1}</td>
-                                    <td>{slider.picture && <Image src={`/${slider.picture}`} className="rounded" width={80} height={80} alt={`${slider.title}`} />}</td>
-                                    <td>{slider.name}</td>
+                                    <td>{slider?.picture && <Image src={`/${slider.picture}`} className="rounded" width={80} height={80} alt={`${slider.title}`} />}</td>
+                                    <td>{slider?.title}</td>
+                                    <td>{slider?.subTitle}</td>
                                     <td><span className={`badge ${slider.status == 'active' ? 'badge-success' : 'badge-error'}`}>{slider.status} </span></td>
                                     <td>
                                         <button onClick={() => modelOpen(slider._id)} className="btn btn-sm btn-info me-1"><Pencil size={15} /></button>
-                                        {/* <button onClick={() => handleDelete(slider._id)} className="btn btn-sm btn-error me-1"><Trash size={15} /></button> */}
-
+                                        <button onClick={() => handleDelete(slider._id)} className="btn btn-sm btn-error me-1"><Trash size={15} /></button>
                                     </td>
                                 </tr>
                             ))}

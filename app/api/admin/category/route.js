@@ -28,7 +28,7 @@ export async function GET(req) {
 
 export async function POST(req) {
     const formData = await req.formData();
-    const body = Object.fromEntries(formData.entries());
+    const body = Object.fromEntries([...formData.entries()].filter(([key]) => key !== 'picture' && key !== 'banner'));
     try {
         await Connection();
         const slug = slugify(body.name, { lower: true, strict: true });
@@ -56,8 +56,6 @@ export async function POST(req) {
         return NextResponse.json({ category, message: "Category Created Successfully" }, { status: 201 })
 
     } catch (error) {
-        await safeDelete(formData.get('picture'));
-        await safeDelete(formData.get('banner'));
         if (error instanceof z.ZodError) {
             const errors = errorOrganize(error.issues);
             return NextResponse.json({ errors }, { status: 400 });
@@ -69,7 +67,7 @@ export async function POST(req) {
 
 export async function PUT(req) {
     const formData = await req.formData();
-    const body = Object.fromEntries(formData.entries());
+    const body = Object.fromEntries([...formData.entries()].filter(([key]) => key !== 'picture' && key !== 'banner'));
     try {
         await Connection();
         const id = req.nextUrl.searchParams.get("id");
@@ -97,8 +95,6 @@ export async function PUT(req) {
         return NextResponse.json({ category, message: "Category Updated Successfully" }, { status: 201 })
 
     } catch (error) {
-        await safeDelete(formData.get('picture'));
-        await safeDelete(formData.get('banner'));
         if (error instanceof z.ZodError) {
             const errors = errorOrganize(error.issues);
             return NextResponse.json({ errors }, { status: 400 });
