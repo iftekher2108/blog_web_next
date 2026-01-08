@@ -13,8 +13,6 @@ export default function CategoryComponent({ token }) {
     const [id, setId] = useState(null)
     const [category, setCategory] = useState(null);
     const formRef = useRef(null)
-    const [name, setName] = useState('')
-    const [status, setStatus] = useState('active')
 
     const [banner, setBanner] = useState(null)
     const [bannerUrl, setBannerUrl] = useState(null)
@@ -46,11 +44,10 @@ export default function CategoryComponent({ token }) {
 
 
     const modelOpen = async (id = null) => {
+        reset()
         if (id == null) {
-            reset()
             document.getElementById('categoryModel').setAttribute('open', true)
         } else {
-            reset()
             setId(id)
             document.getElementById('categoryModel').setAttribute('open', true)
             const res = await fetch(`/api/admin/category?id=${id}`, {
@@ -74,6 +71,8 @@ export default function CategoryComponent({ token }) {
         setPictureUrl(null)
         setBanner(null)
         setBannerUrl(null)
+        setCategory(null)
+        setErrors({})
         formRef.current?.reset()
     }
 
@@ -141,6 +140,7 @@ export default function CategoryComponent({ token }) {
         } finally {
             setLoading(false)
             getCategories()
+            reset()
         }
     }
 
@@ -169,6 +169,7 @@ export default function CategoryComponent({ token }) {
         } catch (error) {
             console.error('Failed to delete category:', error)
         } finally {
+            setLoading(false)
             getCategories()
         }
 
@@ -192,7 +193,6 @@ export default function CategoryComponent({ token }) {
 
                         <h3 className="font-bold text-lg">Category</h3>
                         <form onSubmit={handleSubmit} ref={formRef} method="POST">
-
 
                             <div className="my-3">
                                 <div className="form-control mb-3">
