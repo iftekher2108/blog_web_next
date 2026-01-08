@@ -51,7 +51,7 @@ const TextEditor = forwardRef(({ initialValue }, ref) => {
       direction: ltr !important; 
       text-align: left !important; 
       margin: 0;
-      padding: 10px 20px !important; 
+      padding: 10px 10px !important; 
       color: white !important; 
     }
     p { margin: 0; text-align: left !important; }

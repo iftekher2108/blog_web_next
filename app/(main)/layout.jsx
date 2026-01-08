@@ -1,11 +1,8 @@
 // import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
-import "@fortawesome/fontawesome-free/css/all.min.css"
 import Header from "@/component/header";
 import Footer from "@/component/footer";
 import { cookies } from "next/headers";
-import { X } from "lucide-react";
-
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
 //   subsets: ["latin"],

@@ -314,10 +314,10 @@ export default function SliderComponent({ token }) {
                             {sliders.map((slider, i) => (
                                 <tr key={slider._id}>
                                     <td>{i + 1}</td>
-                                    <td>{slider?.picture && <Image src={`/${slider.picture}`} className="rounded" width={80} height={80} alt={`${slider.title}`} />}</td>
+                                    <td>{slider?.picture && <Image src={`/${slider.picture}`} className="rounded" width={80} height={80} alt={`${slider?.title}`} />}</td>
                                     <td>{slider?.title}</td>
                                     <td>{slider?.subTitle}</td>
-                                    <td><span className={`badge ${slider.status == 'active' ? 'badge-success' : 'badge-error'}`}>{slider.status} </span></td>
+                                    <td><span className={`badge ${slider?.status == 'active' ? 'badge-success' : 'badge-error'}`}>{slider?.status} </span></td>
                                     <td>
                                         <button onClick={() => modelOpen(slider._id)} className="btn btn-sm btn-info me-1"><Pencil size={15} /></button>
                                         <button onClick={() => handleDelete(slider._id)} className="btn btn-sm btn-error me-1"><Trash size={15} /></button>

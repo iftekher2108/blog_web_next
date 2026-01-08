@@ -1,5 +1,4 @@
 import "@/app/globals.css";
-import "@fortawesome/fontawesome-free/css/all.min.css"
 import { UserProvider } from "./userContext";
 import { StatusProvider } from "./statusContext";
 import { cookies } from "next/headers";

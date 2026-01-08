@@ -9,7 +9,7 @@ export default function CategoryComponent({ token }) {
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
-    
+
     const [id, setId] = useState(null)
     const [category, setCategory] = useState(null);
     const formRef = useRef(null)
@@ -137,6 +137,7 @@ export default function CategoryComponent({ token }) {
         }
         catch (err) {
             setMessage("Something went wrong" + err)
+            console.log(err)
         } finally {
             setLoading(false)
             getCategories()
@@ -192,80 +193,80 @@ export default function CategoryComponent({ token }) {
                         <h3 className="font-bold text-lg">Category</h3>
                         <form onSubmit={handleSubmit} ref={formRef} method="POST">
 
+
+                            <div className="my-3">
+                                <div className="form-control mb-3">
+                                    <label className="floating-label">
+                                        <input type="text" defaultValue={category?.name ?? ''} placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
+                                    </label>
+                                    {errors.name && <span className="text-error">{errors.name}</span>}
+                                </div>
+
+                                <div className="grid gap-2 md:grid-cols-2">
+                                    <div className="col-span-1">
+                                        <div className="form-control mb-3">
+                                            <label className="label">Picture (400x500 px)</label>
+                                            {/* Else If editing and existing URL exists → preview old image */}
+                                            {pictureUrl && (
+                                                <img
+                                                    src={picture ? pictureUrl : `/${pictureUrl}`}
+                                                    className="rounded mb-3"
+                                                    height={80}
+                                                    alt="picture"
+                                                />
+                                            )}
+                                            <input type="file" onChange={(e) => {
+                                                const file = e.target.files?.[0]
+                                                setPicture(file)
+                                                setPictureUrl(URL.createObjectURL(file))
+                                            }} name="picture" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
+                                        </div>
+                                        {errors.picture && <span className="text-error">{errors.picture}</span>}
+                                    </div>
+
+                                    <div className="col-span-1">
+                                        <div className="form-control mb-3">
+                                            <label className="label">Banner (1920x1080 px)</label>
+
+                                            {/* Else If editing and existing URL exists → preview old image */}
+                                            {bannerUrl && (
+                                                <img
+                                                    src={banner ? bannerUrl : `/${bannerUrl}`}
+                                                    className="rounded mb-3"
+                                                    height={80}
+                                                    alt="banner"
+                                                />
+                                            )}
+                                            <input type="file" onChange={(e) => {
+                                                const file = e.target.files?.[0]
+                                                setBanner(file)
+                                                setBannerUrl(URL.createObjectURL(file))
+                                            }} name="banner" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
+                                        </div>
+                                        {errors.banner && <span className="text-error">{errors.banner}</span>}
+
+                                    </div>
+                                </div>
+
+                                <div className="form-control mb-3">
+                                    <label className="floating-label">
+                                        <select name="status" defaultValue={category?.status ?? ''} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </label>
+                                    {errors.status && <span className="text-error">{errors.status}</span>}
+                                </div>
+
+                                <div className="flex justify-end">
+                                    <button className="btn btn-primary">{loading ? <span className="loading loading-spinner loading-md"></span> : "Submit"}</button>
+                                </div>
+                            </div>
                         </form>
-                        <div className="my-3">
-                            <div className="form-control mb-3">
-                                <label className="floating-label">
-                                    <input type="text" defaultValue={category?.name ?? ''} placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
-                                </label>
-                                {errors.name && <span className="text-error">{errors.name}</span>}
-                            </div>
-
-                            <div className="grid gap-2 md:grid-cols-2">
-                                <div className="col-span-1">
-                                    <div className="form-control mb-3">
-                                        <label className="label">Picture (400x500 px)</label>
-                                        {/* Else If editing and existing URL exists → preview old image */}
-                                        {pictureUrl && (
-                                            <img
-                                                src={picture ? pictureUrl : `/${pictureUrl}`}
-                                                className="rounded mb-3"
-                                                height={80}
-                                                alt="picture"
-                                            />
-                                        )}
-                                        <input type="file" onChange={(e) => {
-                                            const file = e.target.files?.[0]
-                                            setPicture(file)
-                                            setPictureUrl(URL.createObjectURL(file))
-                                        }} name="picture" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
-                                    </div>
-                                    {errors.picture && <span className="text-error">{errors.picture}</span>}
-                                </div>
-
-                                <div className="col-span-1">
-                                    <div className="form-control mb-3">
-                                        <label className="label">Banner (1920x1080 px)</label>
-
-                                        {/* Else If editing and existing URL exists → preview old image */}
-                                        {bannerUrl && (
-                                            <img
-                                                src={ banner ? bannerUrl : `/${bannerUrl}`}
-                                                className="rounded mb-3"
-                                                height={80}
-                                                alt="banner"
-                                            />
-                                        )}
-                                        <input type="file" onChange={(e) => {
-                                            const file = e.target.files?.[0]
-                                            setBanner(file)
-                                            setBannerUrl(URL.createObjectURL(file))
-                                        } } name="banner" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
-                                    </div>
-                                    {errors.banner && <span className="text-error">{errors.banner}</span>}
-
-                                </div>
-                            </div>
-
-                            <div className="form-control mb-3">
-                                <label className="floating-label">
-                                    <select name="status" defaultValue={category?.status ?? ''} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                    </select>
-                                </label>
-                                {errors.status && <span className="text-error">{errors.status}</span>}
-                            </div>
-
-
-                            <div className="flex justify-end">
-                                <button className="btn btn-primary">{loading ? <span className="loading loading-spinner loading-md"></span> : "Submit"}</button>
-                            </div>
-                        </div>
                     </div>
                 </dialog>
             </div>
-            
+
             <div className="mt-5">
                 <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
                     <table className="table">
@@ -284,13 +285,13 @@ export default function CategoryComponent({ token }) {
                             {categories.map((category, i) => (
                                 <tr key={category._id}>
                                     <td>{i + 1}</td>
-                                    <td>{category.picture && <Image src={`/${category.picture}`} className="rounded" width={80} height={80} alt={`${category.name}`} />}</td>
-                                    <td>{category.banner && <Image src={`/${category.banner}`} className="rounded" width={80} height={80} alt={`${category.name}`} />}</td>
-                                    <td>{category.name}</td>
-                                    <td><span className={`badge ${category.status == 'active' ? 'badge-success' : 'badge-error'}`}>{category.status} </span></td>
+                                    <td>{category?.picture && <Image src={`/${category.picture}`} className="rounded" width={80} height={80} alt={`${category?.name}`} />}</td>
+                                    <td>{category?.banner && <Image src={`/${category.banner}`} className="rounded" width={80} height={80} alt={`${category?.name}`} />}</td>
+                                    <td>{category?.name}</td>
+                                    <td><span className={`badge ${category?.status == 'active' ? 'badge-success' : 'badge-error'}`}>{category?.status} </span></td>
                                     <td>
                                         <button onClick={() => modelOpen(category._id)} className="btn btn-sm btn-info me-1"><Pencil size={15} /></button>
-                                        <button onClick={()=> handleDelete(category._id)} className="btn btn-sm btn-error me-1"><Trash size={15} /></button>
+                                        <button onClick={() => handleDelete(category._id)} className="btn btn-sm btn-error me-1"><Trash size={15} /></button>
 
                                     </td>
                                 </tr>

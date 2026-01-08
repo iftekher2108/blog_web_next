@@ -28,7 +28,9 @@ export async function GET(req) {
 
 export async function POST(req) {
     const formData = await req.formData();
-    const body = Object.fromEntries([...formData.entries()].filter(([key]) => key !== 'picture' && key !== 'banner'));
+    const body = Object.fromEntries(formData.entries());
+    delete body.picture;
+    delete body.banner;
     try {
         await Connection();
         const slug = slugify(body.name, { lower: true, strict: true });
@@ -38,7 +40,7 @@ export async function POST(req) {
         // if (!picture) {
         //     return NextResponse.json({ message: "No file uploaded" }, { status: 400 });
         // }
-        if (picture) {
+        if (picture && picture.name) {
            const picturePath = await FileUpload({ dirpath: 'category', file: picture, file_name: 'cat' })
             data.picture = picturePath
         }
@@ -47,7 +49,7 @@ export async function POST(req) {
         // if (!banner) {
         //     return NextResponse.json({ message: "No file uploaded" }, { status: 400 });
         // }
-        if (banner) {
+        if (banner && banner.name) {
            const bannerPath = await FileUpload({ dirpath: "category", file: banner, file_name: 'cat_banner' })
             data.banner = bannerPath
         }
@@ -67,7 +69,9 @@ export async function POST(req) {
 
 export async function PUT(req) {
     const formData = await req.formData();
-    const body = Object.fromEntries([...formData.entries()].filter(([key]) => key !== 'picture' && key !== 'banner'));
+    const body = Object.fromEntries(formData.entries());
+    delete body.picture;
+    delete body.banner;
     try {
         await Connection();
         const id = req.nextUrl.searchParams.get("id");
@@ -78,14 +82,14 @@ export async function PUT(req) {
         console.log(data)
 
         const picture = formData.get('picture');
-        if (picture) {
+        if (picture && picture.size > 0 && picture.name) {
            await safeDelete(category.picture)
            const picturePath = await FileUpload({ dirpath: 'category', file: picture, file_name: 'cat' })
             data.picture = picturePath
         }
 
         const banner = formData.get('banner');
-        if (banner) {
+        if (banner && banner.size > 0 && banner.nmae) {
            await safeDelete(category.banner)
            const bannerPath = await FileUpload({ dirpath: "category", file: banner, file_name: 'cat_banner' })
             data.banner = bannerPath

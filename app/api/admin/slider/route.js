@@ -26,13 +26,13 @@ export async function GET(req) {
 
 export async function POST(req) {
     const formData = await req.formData();
-    const body = Object.fromEntries([...formData.entries()].filter(([key]) => key !== 'picture'));
-
+    const body = Object.fromEntries(formData.entries());
+    delete body.picture;
     try {
         await Connection();
         const data = sliderSchema.parse({ ...body })
         const picture = formData.get('picture');
-        if (picture) {
+        if (picture && picture.size > 0) {
             const picturePath = await FileUpload({ dirpath: 'slider', file: picture, file_name: 'slider' })
             data.picture = picturePath
         }
@@ -52,7 +52,8 @@ export async function POST(req) {
 
 export async function PUT(req) {
     const formData = await req.formData();
-    const body = Object.fromEntries([...formData.entries()].filter(([key]) => key !== 'picture'));
+    const body = Object.fromEntries(formData.entries());
+    delete body.picture
 
     try {
         await Connection();
@@ -63,7 +64,7 @@ export async function PUT(req) {
         console.log(data)
 
         const picture = formData.get('picture');
-        if (picture && picture.size < 0) {
+        if (picture && picture.size > 0 && picture.name) {
             await safeDelete(slider.picture)
             const picturePath = await FileUpload({ dirpath: 'slider', file: picture, file_name: 'slider' })
             data.picture = picturePath
