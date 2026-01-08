@@ -8,20 +8,20 @@ import Select from 'react-select'
 import dynamic from 'next/dynamic';
 import MySelect from "@/component/MySelect";
 // SSR বন্ধ করে এডিটর ইম্পোর্ট করা হচ্ছে
-const TextEditor = dynamic(() => import('@/component/Editor'), { 
-  ssr: false,
-  loading: () => <p>Loading Editor...</p>
+const TextEditor = dynamic(() => import('@/component/Editor'), {
+    ssr: false,
+    loading: () => <p>Loading Editor...</p>
 });
 
 
 export default function BlogComponent({ token }) {
 
-
     const { setMessage } = useMessage();
-    const [blogs, setBlogs] = useState([])
-    const [loading, setLoading] = useState(false)
-    const [errors, setErrors] = useState({})
-
+    const formRef = useRef(null)
+    const [blogs, setBlogs] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [blog, setBlog] = useState(null);
 
 
     const [getCategories, setGetCategories] = useState([])
@@ -31,15 +31,10 @@ export default function BlogComponent({ token }) {
     })
 
     const [id, setId] = useState(null);
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
+
     const [categories, setCategories] = useState([]);
-    const [keywords, setKeywords] = useState('')
-    const [tags, setTags] = useState('')
+
     const [content, setContent] = useState('')
-    const [featured, setFeatured] = useState(false)
-    const [is_comment_enabled, setIs_comment_enabled] = useState(true)
-    const [status, setStatus] = useState('draft')
 
     const [banner, setBanner] = useState(null)
     const [bannerUrl, setBannerUrl] = useState(null)
@@ -53,7 +48,6 @@ export default function BlogComponent({ token }) {
             const res = await fetch('/api/admin/blog', {
                 method: "GET",
                 headers: {
-                    "content-type": "application/json",
                     Authorization: `Bearer ${token}`,
                 }
             })
@@ -73,115 +67,111 @@ export default function BlogComponent({ token }) {
     const modelOpen = async (id = null) => {
         if (id == null) {
             reset()
-            document.getElementById('categoryModel').setAttribute('open', true)
+            document.getElementById('blogModel').setAttribute('open', true)
         } else {
             reset()
             setId(id)
-            document.getElementById('categoryModel').setAttribute('open', true)
-            const res = await fetch(`/api/admin/category?id=${id}`, {
+            document.getElementById('blogModel').setAttribute('open', true)
+            const res = await fetch(`/api/admin/blog?id=${id}`, {
                 method: "GET",
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`
                 }
             })
             const data = await res.json()
             console.log(data)
-            setId(data.category._id)
-            setName(data.category.name)
-            setPictureUrl(data.category.picture)
-            setBannerUrl(data.category.banner)
-            setStatus(data.category.status)
+            setBlog(data.blog)
+            setPictureUrl(data.blog.picture)
+            setBannerUrl(data.blog.banner)
         }
     }
 
     const reset = () => {
         setId(null)
-        setName('');
-        setDescription('')
+        setBlog(null)
+
         setCategories([])
-        setKeywords('')
-        setTags('')
-        setContent('')
-        setFeatured(false)
-        setIs_comment_enabled(true)
+        setContent(null)
 
         setPicture(null);
-        setBanner(null);
-        setStatus('draft');
         setPictureUrl(null)
+        setBanner(null);
         setBannerUrl(null)
-        document.querySelector('input[type="file"]').value = null;
+        formRef.current?.reset();
     }
 
     const modelClose = () => {
-        document.getElementById('categoryModel').removeAttribute('open');
+        document.getElementById('blogModel').removeAttribute('open');
         reset();
     }
 
 
-    const handleSubmit = async () => {
-        setLoading(true)
-        setErrors({})
-        // try {
-        //     const formData = new FormData()
-        //     formData.append("name", name);
-        //     formData.append('status', status)
-        //     if (picture) formData.append("picture", picture);
-        //     if (banner) formData.append("banner", banner);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setErrors({});
+        try {
+            const formData = new FormData(e.currentTarget)
 
-        //     if (id) {
-        //         const res = await fetch(`/api/admin/category?id=${id}`, {
-        //             method: 'PUT',
-        //             body: formData,
-        //             headers: {
-        //                 Authorization: `Bearer ${token}`,
-        //             }
-        //         })
-        //         const data = await res.json();
-        //         console.log(data)
-        //         if (!res.ok) {
-        //             // Zod error from backend
-        //             if (data.errors) {
-        //                 setErrors(data.errors); // Zod returns an array of issues
-        //             } else if (data.message) {
-        //                 setMessage(data.message)
-        //             }
-        //             return;
-        //         }
-        //         console.log("Update success:", data);
-        //         setMessage(data.message)
-        //     } else {
+            const categoryIds = categories.map((cat) => cat.value)
+            formData.append('categories',categoryIds)
+            formData.append('content',content)
+            
+            if (picture) formData.append("picture", picture);
+            if (banner) formData.append("banner", banner);
 
-        //         const res = await fetch('/api/admin/category', {
-        //             method: 'POST',
-        //             body: formData,
-        //             headers: {
-        //                 Authorization: `Bearer ${token}`,
-        //             }
-        //         })
-        //         const data = await res.json();
-        //         console.log(data)
-        //         if (!res.ok) {
-        //             // Zod error from backend
-        //             if (data.errors) {
-        //                 setErrors(data.errors); // Zod returns an array of issues
-        //             } else if (data.message) {
-        //                 setErrors({ message: data.message }); // single error case
-        //             }
-        //             return;
-        //         }
-        //         console.log("Create success:", data);
-        //         setMessage(data.message)
-        //     }
-        //     modelClose()
-        // }
-        // catch (err) {
-        //     setMessage("Something went wrong" + err)
-        // } finally {
-        //     setLoading(false)
-        //     getCategories()
-        // }
+            if (id) {
+                const res = await fetch(`/api/admin/blog?id=${id}`, {
+                    method: 'PUT',
+                    body: formData,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                })
+                const data = await res.json();
+                console.log(data)
+                if (!res.ok) {
+                    // Zod error from backend
+                    if (data.errors) {
+                        setErrors(data.errors); // Zod returns an array of issues
+                    } else if (data.message) {
+                        setMessage(data.message)
+                    }
+                    return;
+                }
+                console.log("Update success:", data);
+                setMessage(data.message)
+            } else {
+
+                const res = await fetch('/api/admin/blog', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                })
+                const data = await res.json();
+                console.log(data)
+                if (!res.ok) {
+                    // Zod error from backend
+                    if (data.errors) {
+                        setErrors(data.errors); // Zod returns an array of issues
+                    } else if (data.message) {
+                        setErrors({ message: data.message }); // single error case
+                    }
+                    return;
+                }
+                console.log("Create success:", data);
+                setMessage(data.message)
+            }
+            modelClose()
+        }
+        catch (err) {
+            setMessage("Something went wrong" + err)
+        } finally {
+            setLoading(false)
+            getBlogs()
+        }
     }
 
 
@@ -198,113 +188,119 @@ export default function BlogComponent({ token }) {
                 <h3 className="text-primary text-xl font-bold">Blog List</h3>
                 <button onClick={() => modelOpen()} className="btn btn-primary"><Plus size={20} /> Add Blog</button>
 
-                <dialog id="categoryModel" className="modal">
+                <dialog id="blogModel" className="modal">
                     <div className="modal-box max-w-full">
                         <button onClick={() => modelClose()} className="btn btn-circle btn-ghost absolute right-2 top-2">✕</button>
 
-                        <h3 className="font-bold text-lg">Category</h3>
-                        <div className="grid grid-cols-2 gap-2 my-3">
-                            <div className="col-span-2 form-control mb-3">
-                                <label className="floating-label">
-                                    <input type="text" value={name ?? ''} onChange={(e) => setName(e.target.value)} placeholder="Name" name="name" className="input focus:input-primary w-full focus:border-0" />
-                                </label>
-                                {errors.name && <span className="text-error">{errors.name}</span>}
-                            </div>
+                        <h3 className="font-bold text-lg">Blog</h3>
 
-                            <div className="col-span-2 form-control mb-3">
-                                <MySelect instanceId="category-select" closeMenuOnSelect={false} isMulti onChange={(selectedOptions) => setCategories(selectedOptions)} options={categoryOptions} value={categories} />
-                                {errors.status && <span className="text-error">{errors.status}</span>}
-                            </div>
-
-                            <div className="col-span-2 grid gap-2 md:grid-cols-2">
-                                <div className="col-span-1">
-                                    <div className="form-control mb-3">
-                                        <label className="label">Picture (400x500 px)</label>
-                                        {picture &&
-                                            <img src={`${URL.createObjectURL(picture)}`} className="rounded mb-3" height={80} alt="picture" />
-                                        }
-                                        {/* Else If editing and existing URL exists → preview old image */}
-                                        {!picture && pictureUrl && (
-                                            <img
-                                                src={`/${pictureUrl}`}
-                                                className="rounded mb-3"
-                                                height={80}
-                                                alt="picture"
-                                            />
-                                        )}
-                                        <input type="file" onChange={(e) => setPicture(e.target.files[0])} name="picture" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
-                                    </div>
-                                    {errors.picture && <span className="text-error">{errors.picture}</span>}
+                        <form onSubmit={handleSubmit} ref={formRef} method="post">
+                            <div className="grid grid-cols-2 gap-2 my-3">
+                                <div className="col-span-2 form-control mb-3">
+                                    <label className="floating-label">
+                                        <input type="text" defaultValue={blog?.name ?? ''} placeholder="Title" name="title" className="input focus:input-primary w-full focus:border-0" />
+                                    </label>
+                                    {errors.title && <span className="text-error">{errors.title}</span>}
                                 </div>
 
-                                <div className="col-span-1">
-                                    <div className="form-control mb-3">
-                                        <label className="label">Banner (1920x1080 px)</label>
-                                        {banner &&
-                                            <img src={`${URL.createObjectURL(banner)}`} className="rounded mb-3" height={80} alt="banner" />
-                                        }
-                                        {/* Else If editing and existing URL exists → preview old image */}
-                                        {!banner && bannerUrl && (
-                                            <img
-                                                src={`/${bannerUrl}`}
-                                                className="rounded mb-3"
-                                                height={80}
-                                                alt="banner"
-                                            />
-                                        )}
-                                        <input type="file" onChange={(e) => setBanner(e.target.files[0])} name="banner" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
-                                    </div>
-                                    {errors.banner && <span className="text-error">{errors.banner}</span>}
+                                <div className="col-span-2 form-control mb-3">
+                                    <MySelect instanceId="category-select" closeMenuOnSelect={false} isMulti onChange={(selectedOptions) => setCategories(selectedOptions)} options={categoryOptions} value={categories} />
+                                    {errors.status && <span className="text-error">{errors.status}</span>}
+                                </div>
 
+                                <div className="col-span-2 grid gap-2 md:grid-cols-2">
+                                    <div className="col-span-1">
+                                        <div className="form-control mb-3">
+                                            <label className="label">Picture (400x500 px)</label>
+
+                                            {/* Else If editing and existing URL exists → preview old image */}
+                                            {pictureUrl && (
+                                                <img
+                                                    src={picture ? pictureUrl : `/${pictureUrl}`}
+                                                    className="rounded mb-3"
+                                                    height={80}
+                                                    alt="picture"
+                                                />
+                                            )}
+                                            <input type="file" onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                setPicture(file);
+                                                setPictureUrl(URL.createObjectURL(file));
+                                            }} name="picture" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
+                                        </div>
+                                        {errors.picture && <span className="text-error">{errors.picture}</span>}
+                                    </div>
+
+                                    <div className="col-span-1">
+                                        <div className="form-control mb-3">
+                                            <label className="label">Banner (1920x1080 px)</label>
+                                            {/* Else If editing and existing URL exists → preview old image */}
+                                            {bannerUrl && (
+                                                <img
+                                                    src={banner ? bannerUrl : `/${bannerUrl}`}
+                                                    className="rounded mb-3"
+                                                    height={80}
+                                                    alt="banner"
+                                                />
+                                            )}
+                                            <input type="file" onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                setBanner(file);
+                                                setBannerUrl(URL.createObjectURL(file));
+                                            }} name="banner" className="file-input focus:file-input-primary border border- w-full focus:border-0" />
+                                        </div>
+                                        {errors.banner && <span className="text-error">{errors.banner}</span>}
+
+                                    </div>
+                                </div>
+
+                                <div className="col-span-2 form-control mb-3">
+                                    <label className="floating-label">
+                                        <textarea defaultValue={blog?.description ?? ''} placeholder="Description" name="description" className="textarea focus:textarea-primary w-full focus:border-0" />
+                                    </label>
+                                    {errors.description && <span className="text-error">{errors.description}</span>}
+                                </div>
+
+                                <div className="col-span-2 form-control mb-3">
+                                    <TextEditor initialValue={blog?.content} onChange={(content) => setContent(content)} />
+                                    {errors.keywords && <span className="text-error">{errors.keywords}</span>}
+                                </div>
+
+
+                                <div className="col-span-2 form-control mb-3">
+                                    <label className="floating-label">
+                                        <textarea defaultValue={blog?.keywords ?? ''} placeholder="Keywords" name="keywords" className="textarea focus:textarea-primary w-full focus:border-0" />
+                                    </label>
+                                    {errors.keywords && <span className="text-error">{errors.keywords}</span>}
+                                </div>
+
+                                <div className="col-span-2 form-control mb-3">
+                                    <label className="floating-label">
+                                        <textarea defaultValue={blog?.tags ?? ''} placeholder="tags" name="tags" className="textarea focus:textarea-primary w-full focus:border-0" />
+                                    </label>
+                                    {errors.tags && <span className="text-error">{errors.tags}</span>}
+                                </div>
+
+                                <div className="form-control mb-3">
+                                    <label className="floating-label">
+                                        <select name="status" defaultValue={blog?.status ?? ''} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
+                                            <option value="published">Published</option>
+                                            <option value="draft">Draft</option>
+                                            <option value="archived">Archived</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="review">Review</option>
+                                            <option value="unpublished">unpublished</option>
+                                        </select>
+                                    </label>
+                                    {errors.status && <span className="text-error">{errors.status}</span>}
+                                </div>
+
+
+                                <div className="flex justify-end">
+                                    <button className="btn btn-primary">{loading ? <span className="loading loading-spinner loading-md"></span> : "Submit"}</button>
                                 </div>
                             </div>
-
-                            <div className="col-span-2 form-control mb-3">
-                                <label className="floating-label">
-                                    <textarea defaultValue={description ?? ''} onChange={(e) => setDescription(e.target.value)} placeholder="Description" name="description" className="textarea focus:textarea-primary w-full focus:border-0" />
-                                </label>
-                                {errors.description && <span className="text-error">{errors.description}</span>}
-                            </div>
-
-                            <div className="col-span-2 form-control mb-3">
-                                <TextEditor initialValue={content} onChange={(content) => setContent(content)} />
-                                {errors.keywords && <span className="text-error">{errors.keywords}</span>}
-                            </div>
-
-
-                            <div className="col-span-2 form-control mb-3">
-                                <label className="floating-label">
-                                    <textarea defaultValue={keywords ?? ''} onChange={(e) => setKeywords(e.target.value)} placeholder="Keywords" name="keywords" className="textarea focus:textarea-primary w-full focus:border-0" />
-                                </label>
-                                {errors.keywords && <span className="text-error">{errors.keywords}</span>}
-                            </div>
-
-                            <div className="col-span-2 form-control mb-3">
-                                <label className="floating-label">
-                                    <textarea defaultValue={tags ?? ''} onChange={(e) => setTags(e.target.value)} placeholder="tags" name="tags" className="textarea focus:textarea-primary w-full focus:border-0" />
-                                </label>
-                                {errors.tags && <span className="text-error">{errors.tags}</span>}
-                            </div>
-
-                            <div className="form-control mb-3">
-                                <label className="floating-label">
-                                    <select name="status" value={status ?? ''} onChange={(e) => setStatus(e.target.value)} placeholder="Status" className="select focus:select-primary w-full focus:border-0">
-                                        <option value="published">Published</option>
-                                        <option value="draft">Draft</option>
-                                        <option value="archived">Archived</option>
-                                        <option value="pending">Pending</option>
-                                        <option value="review">Review</option>
-                                        <option value="unpublished">unpublished</option>
-                                    </select>
-                                </label>
-                                {errors.status && <span className="text-error">{errors.status}</span>}
-                            </div>
-
-
-                            <div className="flex justify-end">
-                                <button onClick={handleSubmit} className="btn btn-primary">{loading ? <span className="loading loading-spinner loading-md"></span> : "Submit"}</button>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 </dialog>
             </div>
