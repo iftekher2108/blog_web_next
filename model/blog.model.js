@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const blogSchema = new mongoose.Schema({
-    name: {
+    title: {
         type: String,
         required: true,
         unique: true,

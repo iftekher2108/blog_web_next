@@ -11,7 +11,5 @@ export const blogSchema = z.object({
     tags: z.string().nullable().optional(),
     created_by: z.string(),
     
-
-
     status: z.string(),
 })

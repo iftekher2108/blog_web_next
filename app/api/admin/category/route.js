@@ -89,7 +89,7 @@ export async function PUT(req) {
         }
 
         const banner = formData.get('banner');
-        if (banner && banner.size > 0 && banner.nmae) {
+        if (banner && banner.size > 0 && banner.name) {
            await safeDelete(category.banner)
            const bannerPath = await FileUpload({ dirpath: "category", file: banner, file_name: 'cat_banner' })
             data.banner = bannerPath

@@ -15,12 +15,6 @@ export default function SliderComponent({ token }) {
     const [id, setId] = useState(null)
     const [slider, setSlider] = useState()
 
-    // const [title, setTitle] = useState('')
-    // const [subTitle, setSubTitle] = useState('')
-    // const [description, setDescription] = useState('')
-    // const [action1, setAction1] = useState('')
-    // const [action2, setAction2] = useState('')
-    // const [status, setStatus] = useState('active')
     const [picture, setPicture] = useState(null)
     const [pictureUrl, setPictureUrl] = useState(null)
 
