@@ -72,8 +72,9 @@ export async function PUT(request) {
             const picturePath = await FileUpload({ dirpath: 'user', file: picture, file_name: "user" })
             data.picture = picturePath
         }
-        await User.findByIdAndUpdate(id, data);
-        return NextResponse.json({ user, message: "User Updated Successfully" }, { status: 200 });
+        // return the updated document
+        const updated = await User.findByIdAndUpdate(id, data, { new: true });
+        return NextResponse.json({ user: updated, message: "User Updated Successfully" }, { status: 200 });
     } catch (error) {
         await safeDelete(formData.get('picture'));
         if (error instanceof z.ZodError) {
